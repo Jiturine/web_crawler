@@ -78,7 +78,4 @@ def commentgetter(Movie_ID, CommentCount):
                 count += 1
     return comments
 
-
-url = f"https://movie.douban.com/subject/34780991/comments?start=20&limit=20&status=P&sort=new_score"
-resp = requests.get(url, headers=headers)
-bs = BeautifulSoup(resp.text, "html.parser")
+print(searcher('流浪地球'))

@@ -43,9 +43,10 @@ def get_book_comments(base_url, count):
     urls = []
     i = 0
     while (i < count):
-        urls.append(base_url + "?start={0}&limit=20&status=P&sort=hotest".format(i))
+        urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=hotest".format(i))
         i += 20
     comments = []
+    comment_count = 0
     for url in urls:
         resp = requests.get(url, headers=headers)
         bs = BeautifulSoup(resp.text, 'html.parser')

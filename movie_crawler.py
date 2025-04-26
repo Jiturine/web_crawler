@@ -51,31 +51,32 @@ def get_movie_comments(base_url, count):
     urls = []
     i = 0
     while (i < count):
-        urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=hotest".format(i))
+        urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=new_score".format(i))
         i += 20
     comments = []
     for url in urls:
         resp = requests.get(url, headers=headers)
         bs = BeautifulSoup(resp.text, 'html.parser')
-        comment_items = bs.find_all("li", {"class": "comment-item"})
+        print(bs)
+        comment_items = bs.find_all("div", {"class": "comment-item"})
         for comment_item in comment_items:
             comment_id = comment_item["data-cid"]
-            avatar = comment_item.find("div", {"class": "avatar"})
-            comment_username = avatar.find("a")["title"]
-            comment = comment_item.find("div", {"class": "comment"})
-            comment_isuseful = int(comment.find("span", {"class": "vote-count"}).get_text())
-            comment_time_str = comment.find("a", {"class": "comment-time"}).get_text()
+            comment_time_str = comment_item.find('a', {"class": "comment-time"}).get_text()
             comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
             comment_timestamp = int(time.mktime(comment_time))
-            comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
-            comment_location = comment.find("span", {"class": "comment-location"}).get_text()
-            match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
-            comment_rating = int((match.group(1))) // 10 if match else 0
+            info = comment_item.find('span', {"class": "comment-info"})
+            comment_content = comment_item.find('span', {"class": "short"}).get_text(strip=True)
+            comment_username = ((comment_item.find('div', {"class": "avatar"})).find("a"))["title"]
+            stars = comment_item.find('span', {"class": lambda x: x and x.startswith('allstar')})[
+                'class'][1]
+            comment_isuseful = info.find(
+                'span', {"class": "votes vote-count"}).get_text(strip=True)
+            comment_rating = int(stars[-2])
             comments.append({
                 "comment_id": comment_id,
                 "comment_username": comment_username,
                 "comment_timestamp": comment_timestamp,
-                "comment_location": comment_location,
+                # "comment_location": comment_location,
                 "comment_rating": comment_rating,
                 "comment_content": comment_content,
                 "comment_isuseful": comment_isuseful
@@ -85,4 +86,4 @@ def get_movie_comments(base_url, count):
                 break
     return comments
 
-print(get_movie_data('https://movie.douban.com/subject/35267208/'))
+print(get_movie_comments('https://movie.douban.com/subject/35267208/',100))
