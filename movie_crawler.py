@@ -5,8 +5,8 @@ import time
 import re
 from headers import headers
 
-def movie_searcher(searchtext):
-    url = f"https://search.douban.com/movie/subject_search?search_text={searchtext}&cat=1002"
+def movie_searcher(search_text):
+    url = f"https://search.douban.com/movie/subject_search?search_text={search_text}&cat=1002"
     resp = requests.get(url, headers=headers)
     bs = BeautifulSoup(resp.text, "html.parser")
     ori = bs.find('script', {"type": "text/javascript"}).get_text(strip=True)
@@ -14,12 +14,16 @@ def movie_searcher(searchtext):
     lst = rein.findall(ori)
     return lst
 
-def get_movie_data(base_url):
-    data = get_movie_info(base_url)
-    data["comment_list"] = get_movie_comments(base_url, 100)
+def generate_movie_url(id):
+    return f"https://movie.douban.com/subject/{id}/"
+
+def get_movie_data(id):
+    data = get_movie_info(id)
+    data["comment_list"] = get_movie_comments(id, 100)
     return data
 
-def get_movie_info(base_url):
+def get_movie_info(id):
+    base_url = generate_movie_url(id)
     resp = requests.get(base_url, headers=headers)
     bs = BeautifulSoup(resp.text, 'html.parser')
     movie_info_json_str = bs.find("script", {"type": "application/ld+json"}).get_text()
@@ -54,9 +58,10 @@ def get_movie_info(base_url):
     }
     return movie_info
 
-def get_movie_comments(base_url, count):
+def get_movie_comments(id, count):
     urls = []
     i = 0
+    base_url = generate_movie_url(id)
     while (i < count):
         urls.append(base_url + "comments?start={0}&limit=20&status=P&sort=new_score".format(i))
         i += 20

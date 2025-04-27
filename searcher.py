@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+from headers import headers
 
 def searcher(searchtext):
     url = f"https://search.douban.com/movie/subject_search?search_text={searchtext}&cat=1002"

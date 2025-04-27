@@ -5,8 +5,8 @@ import time
 import re
 from headers import headers
 
-def book_searcher(searchtext):
-    url = f"https://search.douban.com/book/subject_search?search_text={searchtext}&cat=1002"
+def book_searcher(search_text):
+    url = f"https://search.douban.com/book/subject_search?search_text={search_text}&cat=1002"
     resp = requests.get(url, headers=headers)
     bs = BeautifulSoup(resp.text, "html.parser")
     ori = bs.find('script', {"type": "text/javascript"}).get_text(strip=True)
@@ -14,12 +14,16 @@ def book_searcher(searchtext):
     lst = rein.findall(ori)
     return lst
 
-def get_book_data(base_url):
-    data = get_book_info(base_url)
-    data["comment_list"] = get_book_comments(base_url, 100)
+def generate_book_url(id):
+    return f"https://book.douban.com/subject/{id}/"
+
+def get_book_data(id):
+    data = get_book_info(id)
+    data["comment_list"] = get_book_comments(id, 100)
     return data
 
-def get_book_info(base_url):
+def get_book_info(id):
+    base_url = generate_book_url(id)
     resp = requests.get(base_url, headers=headers)
     bs = BeautifulSoup(resp.text, 'html.parser')
     book_info_json_str = bs.find("script", {"type": "application/ld+json"}).get_text()
@@ -47,9 +51,10 @@ def get_book_info(base_url):
     }
     return book_info
 
-def get_book_comments(base_url, count):
+def get_book_comments(id, count):
     urls = []
     i = 0
+    base_url = generate_book_url(id)
     while (i < count):
         urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=hotest".format(i))
         i += 20
@@ -69,7 +74,6 @@ def get_book_comments(base_url, count):
             comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
             comment_timestamp = int(time.mktime(comment_time))
             comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
-            comment_location = comment.find("span", {"class": "comment-location"}).get_text()
             match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
             comment_rating = int((match.group(1))) // 10 if match else 0
             comments.append({
