@@ -24,7 +24,7 @@ def get_latest_file(directory):
 async def upload_book(request):
     if not request.json:
         return response.json({"error": "未提供 JSON 数据"}, status=400)
-    path = "./upload"
+    path =os.path.dirname(os.path.abspath(__file__))+ "/upload"
     now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
     filename = now_time + ".json"
     with open(path + "/" + filename, 'w', encoding='utf-8') as f:
@@ -36,7 +36,7 @@ async def upload_book(request):
 async def upload_movie(request):
     if not request.json:
         return response.json({"error": "未提供 JSON 数据"}, status=400)
-    path = "./upload"
+    path =os.path.dirname(os.path.abspath(__file__))+ "/upload"
     now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
     filename = now_time + ".json"
     with open(path + "/" + filename, 'w', encoding='utf-8') as f:
