@@ -13,7 +13,7 @@ def configure():
     plt.figure(figsize=(16, 9))
 
 def get_stop_words():
-    with open('stopwords.txt', 'r', encoding='utf-8') as f:
+    with open(os.path.dirname(os.path.abspath(__file__))+ '/stopwords.txt', 'r', encoding='utf-8') as f:
         stopWords = f.read()
     stopWords = ['\n', '', ' '] + stopWords.split()
     return stopWords
