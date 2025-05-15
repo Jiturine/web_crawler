@@ -1,6 +1,7 @@
 from modelscope.pipelines import pipeline
 from modelscope.utils.constant import Tasks
 
+# 对文本进行情感分析
 def classify(input_texts):
     semantic_cls = pipeline(Tasks.text_classification, 'iic/nlp_structbert_sentiment-classification_chinese-base')
     batch_result = semantic_cls(input=input_texts)

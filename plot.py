@@ -6,18 +6,21 @@ from emotion_classification import classify
 import time
 import os
 
+# 配置matplotlib的字体和大小
 def configure():
     plt.rcParams["font.sans-serif"] = ['AR PL UMing CN']
     plt.rcParams["axes.unicode_minus"] = False
     plt.rcParams["font.size"] = 14
     plt.figure(figsize=(16, 9))
 
+# 获取停用词列表
 def get_stop_words():
     with open(os.path.dirname(os.path.abspath(__file__))+ '/stopwords.txt', 'r', encoding='utf-8') as f:
         stopWords = f.read()
     stopWords = ['\n', '', ' '] + stopWords.split()
     return stopWords
 
+# 绘制评论数量和情感分析结果的柱状图
 def plot_book_comment_histogram(book_data_list):
     configure()
     book_names = []
@@ -49,6 +52,7 @@ def plot_book_comment_histogram(book_data_list):
     plt.savefig(save_path)
     return save_path
 
+# 绘制评论词云
 def plot_book_comment_wordcloud(book_data):
     configure()
     comment_text = ""

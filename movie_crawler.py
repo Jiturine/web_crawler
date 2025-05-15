@@ -5,6 +5,7 @@ import time
 import re
 from headers import headers
 
+# 根据关键词搜索电影对应的url列表
 def movie_searcher(search_text):
     url = f"https://search.douban.com/movie/subject_search?search_text={search_text}&cat=1002"
     resp = requests.get(url, headers=headers)
@@ -14,14 +15,17 @@ def movie_searcher(search_text):
     lst = rein.findall(ori)
     return lst
 
+# 根据id生成电影的url
 def generate_movie_url(id):
     return f"https://movie.douban.com/subject/{id}/"
 
+# 获取电影的爬虫数据 (包括电影基本信息和评论信息)
 def get_movie_data(id):
     data = get_movie_info(id)
     data["comment_list"] = get_movie_comments(id, 100)
     return data
 
+# 获取电影的基本信息
 def get_movie_info(id):
     base_url = generate_movie_url(id)
     resp = requests.get(base_url, headers=headers)
@@ -58,6 +62,7 @@ def get_movie_info(id):
     }
     return movie_info
 
+# 获取电影的评论信息
 def get_movie_comments(id, count):
     urls = []
     i = 0
