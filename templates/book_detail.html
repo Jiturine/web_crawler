@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,57 +13,67 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
         .wordcloud-container {
             text-align: center;
             margin: 20px 0;
         }
+
         .wordcloud-container img {
             max-width: 100%;
             height: auto;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         .comment-card {
             margin-bottom: 15px;
             border-left: 4px solid #007bff;
         }
+
         .comment-card.positive {
             border-left-color: #28a745;
         }
+
         .comment-card.negative {
             border-left-color: #dc3545;
         }
+
         .stats-card {
             text-align: center;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
         }
+
         .stats-card.positive {
             background-color: #d4edda;
             color: #155724;
         }
+
         .stats-card.negative {
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .stats-card.total {
             background-color: #e2e3e5;
             color: #383d41;
         }
     </style>
 </head>
+
 <body>
     <div class="container mt-4">
         <h1 class="mb-4">{{ book.book_name }}</h1>
-        
+
         <!-- 书籍基本信息 -->
         <div class="book-info">
             <div class="row">
                 <div class="col-md-6">
                     <p><strong>作者：</strong>{{ book.book_author }}</p>
                     <p><strong>出版社：</strong>{{ book.book_publisher }}</p>
-                    <p><strong>出版日期：</strong>{{ book.book_publish_date if book.book_publish_date else '暂无' }}</p>
+                    <p><strong>出版日期：</strong>{{ book.book_date }}</p>
                 </div>
                 <div class="col-md-6">
                     <p><strong>ISBN：</strong>{{ book.book_isbn }}</p>
@@ -119,4 +130,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

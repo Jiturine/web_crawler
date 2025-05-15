@@ -59,8 +59,9 @@ def plot_book_comment_wordcloud(book_data):
         return
     cut_text = " ".join(jieba.lcut(comment_text))
     stopWords = get_stop_words()
+    stopWords.append(book_data["book_name"])
     cloudword = WordCloud(width=400, height=300, scale=1, margin=2, 
-                            font_path='/usr/share/fonts/windows-fonts/simhei.ttf', 
+                            font_path='fonts/NotoSansCJK-Regular.ttc', 
                             background_color='white', max_words=200, random_state=100, 
                             stopwords=stopWords).generate(cut_text)
     plt.imshow(cloudword)

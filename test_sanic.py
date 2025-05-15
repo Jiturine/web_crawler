@@ -95,11 +95,11 @@ async def upload_movie(request):
         json.dump(request.json, f, ensure_ascii=False, indent=4)
     return response.json({"code": 1, "message": "上传成功！"})
 
-@app.route("/v1/book/comment/sentiment-analysis")
-async def show_plot(request):
-    template = env.get_template("show_plot.html")
-    latest_img_path = get_latest_file("static")
-    return html(template.render(title="情感分析", img_path=latest_img_path))
+# @app.route("/v1/book/comment/sentiment-analysis")
+# async def show_plot(request):
+#     template = env.get_template("show_plot.html")
+#     latest_img_path = get_latest_file("static")
+#     return html(template.render(title="情感分析", img_path=latest_img_path))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

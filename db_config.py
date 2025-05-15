@@ -6,7 +6,7 @@ import pymysql
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '123456',
+    'password': '',
     'database': 'book_crawler',
     'port': 3306,
     'charset': 'utf8mb4',

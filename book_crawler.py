@@ -4,6 +4,7 @@ import requests
 import time
 import re
 from headers import headers
+from emotion_classification import classify_text
 
 def book_searcher(search_text):
     url = f"https://search.douban.com/book/subject_search?search_text={search_text}&cat=1002"
@@ -76,13 +77,15 @@ def get_book_comments(id, count):
             comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
             match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
             comment_rating = int((match.group(1))) // 10 if match else 0
+            comment_ispositive = classify_text(comment_content)
             comments.append({
                 "comment_id": comment_id,
                 "comment_username": comment_username,
                 "comment_timestamp": comment_timestamp,
                 "comment_rating": comment_rating,
                 "comment_content": comment_content,
-                "comment_isuseful": comment_isuseful
+                "comment_isuseful": comment_isuseful,
+                "comment_ispositive": comment_ispositive
             })
             comment_count += 1
             if comment_count >= count:

@@ -4,6 +4,7 @@
 import pymysql
 from pymysql import Error
 from db_config import DB_CONFIG
+from datetime import datetime
 
 class DatabaseOperations:
     def __init__(self):
@@ -111,7 +112,7 @@ class DatabaseOperations:
                         comment['comment_rating'],
                         comment['comment_content'],
                         comment['comment_isuseful'],
-                        comment.get('is_positive', 0)  # 如果没有情感分析结果，默认为0
+                        comment['comment_ispositive']
                     )
                     cursor.execute(comment_sql, comment_values)
                 
@@ -133,6 +134,8 @@ class DatabaseOperations:
                     # 获取评论信息
                     cursor.execute("SELECT * FROM book_comments WHERE book_id = %s", (book_id,))
                     comments = cursor.fetchall()
+                    for comment in comments:
+                        comment['comment_time'] = datetime.fromtimestamp(comment['comment_timestamp'])
                     book['comment_list'] = comments
                     return book
                 return None
