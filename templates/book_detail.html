@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .book-info {
             background-color: #f8f9fa;
@@ -14,16 +15,46 @@
             margin-bottom: 20px;
         }
 
-        .wordcloud-container {
-            text-align: center;
-            margin: 20px 0;
+        .book-image {
+            max-width: 200px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-right: 50px;
         }
 
-        .wordcloud-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .book-rating {
+            color: #e09015;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .rating-stars {
+            color: #e09015;
+            font-size: 16px;
+        }
+
+        .book-meta {
+            color: #666;
+            font-size: 14px;
+            padding-left: 40px;
+        }
+
+        .book-meta p {
+            margin-bottom: 15px;
+        }
+
+        .book-meta strong {
+            color: #333;
+            margin-right: 12px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin: 20px 0;
         }
 
         .comment-card {
@@ -60,34 +91,70 @@
             background-color: #e2e3e5;
             color: #383d41;
         }
+
+        .book-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-4">
-        <h1 class="mb-4">{{ book.book_name }}</h1>
+        <h1 class="book-title">{{ book.book_name }}</h1>
+        <div class="book-author">{{ book.book_author }}</div>
+        <div class="mb-3">
+            <a href="https://book.douban.com/subject/{{ book.book_id }}/" target="_blank" class="btn btn-outline-primary">
+                <i class="bi bi-box-arrow-up-right"></i> 在豆瓣查看详情
+            </a>
+        </div>
 
         <!-- 书籍基本信息 -->
         <div class="book-info">
             <div class="row">
-                <div class="col-md-6">
-                    <p><strong>作者：</strong>{{ book.book_author }}</p>
-                    <p><strong>出版社：</strong>{{ book.book_publisher }}</p>
-                    <p><strong>出版日期：</strong>{{ book.book_date }}</p>
+                <div class="col-md-3 text-center">
+                    <img src="{{ book.book_image }}" alt="{{ book.book_name }}" class="book-image">
+                    <div class="mt-3">
+                        <div class="book-rating">{{ book.book_rating }}</div>
+                        <div class="rating-stars">
+                            {% set rating = book.book_rating|float %}
+                            {% for i in range(5) %}
+                                {% if i < rating|int %}
+                                    <i class="bi bi-star-fill"></i>
+                                {% elif i < rating|int + 1 and rating % 1 >= 0.5 %}
+                                    <i class="bi bi-star-half"></i>
+                                {% else %}
+                                    <i class="bi bi-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <p><strong>ISBN：</strong>{{ book.book_isbn }}</p>
-                    <p><strong>价格：</strong>{{ book.book_price }}</p>
-                    <p><strong>评分：</strong>{{ book.book_rating }}</p>
+                <div class="col-md-9">
+                    <div class="book-meta">
+                        <p><strong>出版社：</strong>{{ book.book_publisher or '暂无' }}</p>
+                        <p><strong>出版日期：</strong>{{ book.book_date or '暂无' }}</p>
+                        <p><strong>ISBN：</strong>{{ book.book_isbn or '暂无' }}</p>
+                        <p><strong>定价：</strong>{{ book.book_price or '暂无' }}</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- 评论统计 -->
+        <div class="section-title">评论统计</div>
         <div class="row mb-4">
             <div class="col-md-4">
                 <div class="stats-card total">
-                    <h3>总评论数</h3>
+                    <h3>评论总数</h3>
                     <h2>{{ total_comments }}</h2>
                 </div>
             </div>
@@ -106,13 +173,13 @@
         </div>
 
         <!-- 词云图 -->
-        <div class="wordcloud-container">
-            <h2 class="mb-4">评论词云分析</h2>
-            <img src="/static/{{ wordcloud_path.split('/')[-1] }}" alt="评论词云图">
+        <div class="section-title">评论词云分析</div>
+        <div class="text-center">
+            <img src="/static/{{ wordcloud_path.split('/')[-1] }}" alt="评论词云图" class="img-fluid">
         </div>
 
         <!-- 评论列表 -->
-        <h2 class="mb-4">评论列表</h2>
+        <div class="section-title">评论列表</div>
         <div class="comments-list">
             {% for comment in book.comment_list %}
             <div class="card comment-card {{ 'positive' if comment.is_positive == 1 else 'negative' }}">
@@ -120,7 +187,7 @@
                     <p class="card-text">{{ comment.comment_content }}</p>
                     <div class="d-flex justify-content-between">
                         <small class="text-muted">评论时间：{{ comment.comment_time }}</small>
-                        <small class="text-muted">情感倾向：{{ '正面' if comment.is_positive == 1 else '负面' }}</small>
+                        <small class="text-muted">情感：{{ '正面' if comment.is_positive == 1 else '负面' }}</small>
                     </div>
                 </div>
             </div>
