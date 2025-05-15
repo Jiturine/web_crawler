@@ -8,7 +8,7 @@ import os
 
 # 配置matplotlib的字体和大小
 def configure():
-    plt.rcParams["font.sans-serif"] = ['AR PL UMing CN']
+    plt.rcParams["font.sans-serif"] = ['SimHei']
     plt.rcParams["axes.unicode_minus"] = False
     plt.rcParams["font.size"] = 14
     plt.figure(figsize=(16, 9))
@@ -40,10 +40,10 @@ def plot_book_comment_histogram(book_data_list):
         negatives.append(negative_num)
     x = numpy.arange(len(book_names))
     width = 0.1
-    plt.bar(x - width, comments, width, label='评论个数')
+    plt.bar(x - width, comments, width, label='评论总数')
     plt.bar(x, positives, width, label='正向评论')
     plt.bar(x + width, negatives, width, label='负向评论')
-    plt.xlabel('个数')
+    plt.xlabel('数量')
     plt.title('书籍评论详情')
     plt.xticks(x, labels=book_names)
     plt.legend()
@@ -63,8 +63,9 @@ def plot_book_comment_wordcloud(book_data):
         return
     cut_text = " ".join(jieba.lcut(comment_text))
     stopWords = get_stop_words()
+    stopWords.append(book_data["book_name"])
     cloudword = WordCloud(width=400, height=300, scale=1, margin=2, 
-                            font_path='/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', 
+                            font_path='fonts/NotoSansCJK-Regular.ttc', 
                             background_color='white', max_words=200, random_state=100, 
                             stopwords=stopWords).generate(cut_text)
     plt.imshow(cloudword)
