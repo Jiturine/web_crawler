@@ -3,27 +3,27 @@ from db_operations import DatabaseOperations
 def test_database():
     db = DatabaseOperations()
     
-    # ²âÊÔ²éÑ¯ËùÓĞÊé¼®
+    # æµ‹è¯•æŸ¥è¯¢æ‰€æœ‰ä¹¦ç±
     with db.connection.cursor() as cursor:
         cursor.execute("SELECT * FROM books")
         books = cursor.fetchall()
-        print("\n=== ËùÓĞÊé¼® ===")
+        print("\n=== æ‰€æœ‰ä¹¦ç± ===")
         for book in books:
-            print(f"ÊéÃû: {book['book_name']}")
-            print(f"×÷Õß: {book['book_author']}")
-            print(f"ÆÀ·Ö: {book['book_rating']}")
+            print(f"ä¹¦å: {book['book_name']}")
+            print(f"ä½œè€…: {book['book_author']}")
+            print(f"è¯„åˆ†: {book['book_rating']}")
             print("---")
             
-        # ²âÊÔ²éÑ¯ÆÀÂÛ
+        # æµ‹è¯•æŸ¥è¯¢è¯„è®º
         if books:
             first_book_id = books[0]['book_id']
             cursor.execute("SELECT * FROM book_comments WHERE book_id = %s", (first_book_id,))
             comments = cursor.fetchall()
-            print(f"\n=== Êé¼® {books[0]['book_name']} µÄÆÀÂÛ ===")
+            print(f"\n=== ä¹¦ç± {books[0]['book_name']} çš„è¯„è®º ===")
             for comment in comments:
-                print(f"ÓÃ»§: {comment['comment_username']}")
-                print(f"ÆÀ·Ö: {comment['comment_rating']}")
-                print(f"ÄÚÈİ: {comment['comment_content'][:50]}...")  # Ö»ÏÔÊ¾Ç°50¸ö×Ö·û
+                print(f"ç”¨æˆ·: {comment['comment_username']}")
+                print(f"è¯„åˆ†: {comment['comment_rating']}")
+                print(f"å†…å®¹: {comment['comment_content'][:50]}...")  # åªæ˜¾ç¤ºå‰50ä¸ªå­—ç¬¦
                 print("---")
     
     db.close()

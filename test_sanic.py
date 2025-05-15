@@ -19,18 +19,14 @@ env = Environment(
 )
 db = DatabaseOperations()
 
-def get_latest_file(directory):
-    files = [os.path.join(directory, f) for f in os.listdir(directory)]
-    files = [f for f in files if os.path.isfile(f)]
-    if not files:
-        return None
-    latest_file = max(files, key=os.path.getmtime)
-    return latest_file
-
-def datetime_handler(obj):
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+def save_to_file(data, type):
+    path = os.path.dirname(os.path.abspath(__file__)) + f"/upload/{type}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+    now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
+    filename = now_time + ".json"
+    with open(path + "/" + filename, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 @app.route("/v1/book/crawled/upload", methods=["POST"])
 async def upload_book(request):
@@ -38,13 +34,7 @@ async def upload_book(request):
         return response.json({"error": "未提供 JSON 数据"}, status=400)
     
     # 保存到文件系统
-    path = os.path.dirname(os.path.abspath(__file__)) + "/upload"
-    if not os.path.exists(path):
-        os.makedirs(path)
-    now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    filename = now_time + ".json"
-    with open(path + "/" + filename, 'w', encoding='utf-8') as f:
-        json.dump(request.json, f, ensure_ascii=False, indent=4)
+    save_to_file(request.json, "book")
     
     # 保存到数据库
     if db.save_book_data(request.json):
@@ -62,7 +52,7 @@ async def get_book_data(request, book_id):
             book_data['book_publish_date'] = book_data['book_publish_date'].strftime('%Y-%m-%d')
         # 生成词云图
         plot.plot_book_comment_wordcloud(book_data)
-        latest_img_path = get_latest_file("static")
+        latest_img_path = f"static/book_comment_wordcloud_{book_id}.png"
         
         # 计算评论统计
         total_comments = len(book_data['comment_list'])
@@ -86,20 +76,14 @@ async def get_book_data(request, book_id):
 async def upload_movie(request):
     if not request.json:
         return response.json({"error": "未提供 JSON 数据"}, status=400)
-    path = os.path.dirname(os.path.abspath(__file__)) + "/upload"
-    if not os.path.exists(path):
-        os.makedirs(path)
-    now_time = time.strftime("%Y%m%d%H%M%S", time.localtime())
-    filename = now_time + ".json"
-    with open(path + "/" + filename, 'w', encoding='utf-8') as f:
-        json.dump(request.json, f, ensure_ascii=False, indent=4)
-    return response.json({"code": 1, "message": "上传成功！"})
+    
+    # 保存到文件系统
+    save_to_file(request.json, "movie")
 
-# @app.route("/v1/book/comment/sentiment-analysis")
-# async def show_plot(request):
-#     template = env.get_template("show_plot.html")
-#     latest_img_path = get_latest_file("static")
-#     return html(template.render(title="情感分析", img_path=latest_img_path))
+    # 保存到数据库
+    pass
+
+    return response.json({"code": 1, "message": "上传成功！"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

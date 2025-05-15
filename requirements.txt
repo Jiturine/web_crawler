@@ -8,3 +8,5 @@ numpy==2.2.5
 Requests==2.32.3
 sanic==25.3.0
 wordcloud==1.9.4
+addict==2.4.0
+datasets=2.16.0
