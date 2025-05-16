@@ -2,6 +2,8 @@
 ### 更新 在test_client.py更新了查看已爬目录和爬取的选择 增加了book_detail的渲染内容
 ### 更新 将book_crawler 改为 web_crawler，增加影评数据表
 
+### 期望在云服务器也安装mysql数据库
+
 ## **Linux系统**安装**mysql**数据库：
 ```bash
 sudo apt update
@@ -24,7 +26,7 @@ systemctl status mysql.service
 sudo mysql -u root -p
 #然后输入之前设置的密码
 ```
-选择web_crawler数据库
+- **选择web_crawler数据库**
 ```bash
 use web_crawler;
 ```
