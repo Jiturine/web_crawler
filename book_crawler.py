@@ -118,7 +118,7 @@ def get_book_info(id):
             "book_price": "暂无价格",
             "book_date": "未知出版日期",
             "book_rating": "暂无评分",
-            "book_image": "/static/no_book_image.png"
+            "book_image": "/book_image/no_book_image.png"
         }
 
 def get_book_comments(id, count):
