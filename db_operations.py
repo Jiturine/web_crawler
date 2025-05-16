@@ -56,7 +56,40 @@ class DatabaseOperations:
                         FOREIGN KEY (book_id) REFERENCES books(book_id)
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
+
+                # 创建movies表
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS movies (
+                        movie_id VARCHAR(20) PRIMARY KEY,
+                        movie_name VARCHAR(255) NOT NULL,
+                        movie_director VARCHAR(255),
+                        movie_scriptwriter VARCHAR(255),
+                        movie_IMDb VARCHAR(20),
+                        movie_star VARCHAR(255),
+                        movie_type VARCHAR(50),
+                        movie_date VARCHAR(50),
+                        movie_rating VARCHAR(10),
+                        movie_image VARCHAR(255),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+                """)
                 
+                # 创建movie_comments表
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS movie_comments (
+                        comment_id VARCHAR(50) PRIMARY KEY,
+                        movie_id VARCHAR(20),
+                        comment_username VARCHAR(255),
+                        comment_timestamp INT,
+                        comment_rating INT,
+                        comment_content TEXT,
+                        comment_isuseful INT,
+                        is_positive TINYINT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+                    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+                """)
                 self.connection.commit()
                 print("数据表创建成功")
         except Exception as e:
@@ -127,6 +160,73 @@ class DatabaseOperations:
             print(f"保存数据时出错: {e}")
             self.connection.rollback()
             return False
+    
+    def save_movie_data(self, movie_data):
+        """保存电影数据到数据库"""
+        try:
+            with self.connection.cursor() as cursor:
+                # 插入或更新电影信息
+                cursor.execute("""
+                    INSERT INTO movies (
+                        movie_id, movie_name, movie_director, movie_scriptwriter, movie_star,
+                        movie_type, movie_date, movie_rating, movie_IMDb, movie_image
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    ) ON DUPLICATE KEY UPDATE
+                        movie_name = VALUES(movie_name),
+                        movie_director = VALUES(movie_director),
+                        movie_scriptwriter = VALUES(movie_scriptwriter),
+                        movie_star = VALUES(movie_star),
+                        movie_type = VALUES(movie_type),
+                        movie_date = VALUES(movie_date),
+                        movie_rating = VALUES(movie_rating),
+                        movie_IMDb = VALUES(movie_IMDb),
+                        movie_image = VALUES(movie_image)
+                """, (
+                    movie_data["movie_id"],
+                    movie_data["movie_name"],
+                    movie_data["movie_director"],
+                    movie_data["movie_scriptwriter"],
+                    movie_data["movie_star"],
+                    movie_data["movie_type"],
+                    movie_data["movie_date"],
+                    movie_data["movie_rating"],
+                    movie_data["movie_IMDb"],
+                    movie_data["movie_image"]
+                ))
+                
+                # 插入评论数据
+                for comment in movie_data.get("comment_list", []):
+                    cursor.execute("""
+                        INSERT INTO movie_comments (
+                            comment_id, movie_id, comment_username, comment_timestamp,
+                            comment_rating, comment_content, comment_isuseful, is_positive
+                        ) VALUES (
+                            %s, %s, %s, %s, %s, %s, %s, %s
+                        ) ON DUPLICATE KEY UPDATE
+                            comment_username = VALUES(comment_username),
+                            comment_timestamp = VALUES(comment_timestamp),
+                            comment_rating = VALUES(comment_rating),
+                            comment_content = VALUES(comment_content),
+                            comment_isuseful = VALUES(comment_isuseful),
+                            is_positive = VALUES(is_positive)
+                    """, (
+                        comment["comment_id"],
+                        movie_data["movie_id"],
+                        comment["comment_username"],
+                        comment["comment_timestamp"],
+                        comment["comment_rating"],
+                        comment["comment_content"],
+                        comment["comment_isuseful"],
+                        comment["comment_ispositive"]
+                    ))
+                
+                self.connection.commit()
+                return True
+        except Exception as e:
+            print(f"保存数据时出错: {e}")
+            self.connection.rollback()
+            return False
 
     def get_book_data(self, book_id):
         try:
@@ -143,6 +243,26 @@ class DatabaseOperations:
                         comment['comment_time'] = datetime.fromtimestamp(comment['comment_timestamp'])
                     book['comment_list'] = comments
                     return book
+                return None
+        except Error as e:
+            print(f"查询数据时出错: {e}")
+            return None
+
+    def get_movie_data(self, movie_id):
+        try:
+            with self.connection.cursor() as cursor:
+                # 查询电影信息
+                cursor.execute("SELECT * FROM movies WHERE movie_id = %s", (movie_id,))
+                movie = cursor.fetchone()
+                
+                if movie:
+                    # 查询评论信息
+                    cursor.execute("SELECT * FROM movie_comments WHERE movie_id = %s", (movie_id,))
+                    comments = cursor.fetchall()
+                    for comment in comments:
+                        comment['comment_time'] = datetime.fromtimestamp(comment['comment_timestamp'])
+                    movie['comment_list'] = comments
+                    return movie
                 return None
         except Error as e:
             print(f"查询数据时出错: {e}")

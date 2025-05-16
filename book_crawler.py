@@ -6,8 +6,8 @@ import re
 from headers import headers
 from emotion_classification import classify_text
 
-# 根据关键词搜索书籍对应的url列表
 def book_searcher(search_text):
+    '''根据关键词搜索书籍对应的url列表'''
     url = f"https://search.douban.com/book/subject_search?search_text={search_text}&cat=1002"
     resp = requests.get(url, headers=headers)
     bs = BeautifulSoup(resp.text, "html.parser")
@@ -16,18 +16,18 @@ def book_searcher(search_text):
     lst = rein.findall(ori)
     return lst
 
-# 根据id生成书籍的url
 def generate_book_url(id):
+    '''根据id生成书籍的url'''
     return f"https://book.douban.com/subject/{id}/"
 
-# 获取书籍的爬虫数据 (包括书籍基本信息和评论信息)
 def get_book_data(id):
+    '''获取书籍的爬虫数据 (包括书籍基本信息和评论信息)'''
     data = get_book_info(id)
     data["comment_list"] = get_book_comments(id, 100)
     return data
 
-# 获取书籍的基本信息
 def get_book_info(id):
+    '''获取书籍的基本信息'''
     try:
         base_url = generate_book_url(id)
         resp = requests.get(base_url, headers=headers)
@@ -118,11 +118,11 @@ def get_book_info(id):
             "book_price": "暂无价格",
             "book_date": "未知出版日期",
             "book_rating": "暂无评分",
-            "book_image": "/static/no_image.png"
+            "book_image": "/static/no_book_image.png"
         }
 
-# 获取书籍的评论信息
 def get_book_comments(id, count):
+    '''获取书籍的评论信息'''
     try:
         urls = []
         i = 0

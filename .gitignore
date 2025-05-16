@@ -2,3 +2,6 @@
 /__pycache__
 /static
 /upload
+/book_image
+/movie_image
+db_config.py

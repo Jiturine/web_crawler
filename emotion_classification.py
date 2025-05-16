@@ -3,8 +3,8 @@ from modelscope.utils.constant import Tasks
 
 semantic_cls = pipeline(Tasks.text_classification, 'iic/nlp_structbert_sentiment-classification_chinese-base')
 
-# 对文本批量分析
 def classify(input_texts):
+    '''对文本批量分析'''
     batch_result = semantic_cls(input=input_texts)
     result_list = []
     for i in range(len(batch_result)):
@@ -15,8 +15,8 @@ def classify(input_texts):
         result_list.append({"comment_content": input_texts[i], "positive_probs": positive_probs, "negative_probs": negative_probs, "is_positive": is_positive})
     return result_list
 
-# 对单个文本进行分析
 def classify_text(input_text):
+    '''对单个文本进行分析'''
     result = semantic_cls(input=input_text)
     sorted_labels_scores= sorted(zip(result['labels'], result['scores']), key=lambda x: x[0] == '正面', reverse=True)
     positive_label, positive_probs = sorted_labels_scores[0]

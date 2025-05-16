@@ -6,8 +6,8 @@ import pymysql
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',# Êý¾Ý¿âÃÜÂë
-    'database': 'book_crawler',
+    'password': 'zzy051007',
+    'database': 'web_crawler',
     'port': 3306,
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor

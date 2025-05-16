@@ -6,22 +6,22 @@ from emotion_classification import classify
 import time
 import os
 
-# 配置matplotlib的字体和大小
 def configure():
+    '''配置matplotlib的字体和大小'''
     plt.rcParams["font.sans-serif"] = ['SimHei']
     plt.rcParams["axes.unicode_minus"] = False
     plt.rcParams["font.size"] = 14
     plt.figure(figsize=(16, 9))
 
-# 获取停用词列表
 def get_stop_words():
+    '''获取停用词列表'''
     with open(os.path.dirname(os.path.abspath(__file__))+ '/stopwords.txt', 'r', encoding='utf-8') as f:
         stopWords = f.read()
     stopWords = ['\n', '', ' '] + stopWords.split()
     return stopWords
 
-# 绘制书籍评论数量和情感分析结果的柱状图
 def plot_book_comment_histogram(book_data_list):
+    '''绘制书籍评论数量和情感分析结果的柱状图'''
     configure()
     book_names = []
     comments = []
@@ -52,8 +52,8 @@ def plot_book_comment_histogram(book_data_list):
     plt.savefig(save_path)
     return save_path
 
-# 绘制书籍评论词云
 def plot_book_comment_wordcloud(book_data):
+    '''绘制书籍评论词云'''
     configure()
     comment_text = ""
     for comment in book_data["comment_list"]:
@@ -74,8 +74,8 @@ def plot_book_comment_wordcloud(book_data):
     plt.savefig(save_path)
     return save_path
 
-# 绘制电影评论数量和情感分析结果的柱状图
 def plot_movie_comment_histogram(movie_data_list):
+    '''绘制电影评论数量和情感分析结果的柱状图'''
     configure()
     movie_names = []
     comments = []
@@ -105,8 +105,8 @@ def plot_movie_comment_histogram(movie_data_list):
     plt.savefig(save_path)
     return save_path
 
-# 绘制电影评论词云
 def plot_movie_comment_wordcloud(movie_data):
+    '''绘制电影评论词云'''
     configure()
     comment_text = ""
     for comment in movie_data["comment_list"]:
