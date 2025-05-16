@@ -128,7 +128,7 @@ def get_movie_info(id):
             "movie_date": "未知上映日期",
             "movie_rating": "暂无评分",
             "movie_IMDb": "未知IMDb",
-            "movie_image": "/static/no_movie_image.png"
+            "movie_image": "/movie_image/no_movie_image.png"
         }
 
 def get_movie_comments(id, count):
