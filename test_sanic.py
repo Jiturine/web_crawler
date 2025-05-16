@@ -2,15 +2,16 @@ from sanic import Sanic, html, response
 from sanic.response import text, json
 import time
 import json
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from emotion_classification import classify
 import plot
 import os
-
-app = Sanic("mySanic")
+import searcher
+import time
+app = Sanic("Web_Crawler")
 app.static("/static", "./static") 
 
-env = Environment(loader=FileSystemLoader("templates"))
+env = Environment(loader=FileSystemLoader(os.path.dirname(os.path.abspath(__file__))+"/templates"),autoescape=select_autoescape(["html", "htm"]))
 
 def get_latest_file(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory)]
@@ -19,6 +20,21 @@ def get_latest_file(directory):
         return None
     latest_file = max(files, key=os.path.getmtime)
     return latest_file
+@app.route("/")
+async def home(request):
+    template = env.get_template("index.html")
+    return html(template.render())
+
+@app.route("/v1/search")
+async def search_handler(request):
+    query = request.args.get("query", "")
+    results = searcher.searcher2(query)
+    
+    return json({
+        "query": query,
+        "timestamp": time.now().timestamp(),
+        "results": results
+    })
 
 @app.route("/v1/book/crawled/upload", methods=["POST"])
 async def upload_book(request):

@@ -2,3 +2,7 @@
 /__pycache__
 /static
 /upload
+__pycache__/headers.cpython-312.pyc
+/fe
+fe.py
+headers.py
