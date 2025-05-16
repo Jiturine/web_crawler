@@ -41,6 +41,6 @@ pass
 - **本地测试**：  
   运行test_sanic.py，然后在test_client.py爬取到数据。
     - **书籍爬取结果**：**http://localhost:8000/v1/book/data/<书籍id>**
-    - **影视爬取结果**：**http://localhost:8000/v1/movie/data/<电影id>**
+    - **电影爬取结果**：**http://localhost:8000/v1/movie/data/<电影id>**
 - **云服务器**：  
     pass
