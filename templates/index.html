@@ -12,33 +12,38 @@
             background-color: #f8f9fa;
             font-family: "Microsoft YaHei", sans-serif;
         }
+
         .container {
             max-width: 1200px;
             margin-top: 30px;
             padding: 0 20px;
         }
+
         .search-box {
             background: white;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
         }
+
         .title {
             color: #1a1a1a;
             margin-bottom: 30px;
             text-align: center;
             font-weight: 600;
         }
+
         .form-control {
             border-radius: 10px;
             padding: 12px;
             margin-bottom: 20px;
             color: #333333;
         }
+
         .form-select {
             color: #1a1a1a;
             font-size: 18px;
@@ -49,28 +54,33 @@
             background-color: white;
             cursor: pointer;
         }
+
         .form-select option {
             color: #2c3e50;
             font-size: 16px;
             font-weight: 500;
             padding: 10px;
         }
+
         .form-select option:first-child {
             color: #1a1a1a;
             font-size: 18px;
             font-weight: 600;
             padding: 12px;
         }
+
         .form-select option:not(:first-child) {
             color: #2c3e50;
             font-size: 16px;
             font-weight: 500;
             padding: 10px;
         }
+
         .option-emoji {
             font-size: 18px;
             margin-right: 8px;
         }
+
         .btn-primary {
             background-color: #3498db;
             border: none;
@@ -80,35 +90,42 @@
             font-size: 16px;
             transition: all 0.3s;
         }
+
         .btn-primary:hover {
             background-color: #2980b9;
             transform: translateY(-2px);
         }
+
         .status-box {
             margin-top: 20px;
             padding: 15px;
             border-radius: 10px;
             display: none;
         }
+
         .crawling {
             background-color: #fff3cd;
             color: #856404;
         }
+
         .success {
             background-color: #d4edda;
             color: #155724;
         }
+
         .error {
             background-color: #f8d7da;
             color: #721c24;
         }
+
         .crawled-list {
             margin-top: 30px;
             background: white;
             padding: 20px;
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
+
         .crawled-item {
             padding: 20px;
             border-bottom: 1px solid #eee;
@@ -116,12 +133,14 @@
             background: white;
             border-radius: 12px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
+
         .crawled-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
         }
+
         .crawled-item .title {
             color: #2c3e50;
             font-size: 18px;
@@ -131,6 +150,7 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .crawled-item .type-badge {
             font-size: 12px;
             padding: 4px 8px;
@@ -138,28 +158,34 @@
             margin-left: 10px;
             font-weight: normal;
         }
+
         .crawled-item .type-book {
             background-color: #e8f4f8;
             color: #2980b9;
         }
+
         .crawled-item .type-movie {
             background-color: #f0f7e6;
             color: #27ae60;
         }
+
         .crawled-item .info {
             color: #666;
             font-size: 14px;
             line-height: 1.6;
         }
+
         .crawled-item .detail-link {
             color: #3498db;
             text-decoration: none;
             font-size: 14px;
             transition: color 0.3s;
         }
+
         .crawled-item .detail-link:hover {
             color: #2980b9;
         }
+
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3498db;
@@ -170,10 +196,17 @@
             display: inline-block;
             margin-right: 10px;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
+
         .search-results {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -182,6 +215,7 @@
             padding: 20px;
             min-height: 100px;
         }
+
         .result-item {
             border: 1px solid #ddd;
             border-radius: 12px;
@@ -193,10 +227,12 @@
             display: flex;
             flex-direction: column;
         }
+
         .result-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+
         .result-item img {
             width: 100%;
             height: 320px;
@@ -204,12 +240,14 @@
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
         .result-item .name {
             margin-top: 10px;
             font-size: 16px;
             color: #1a1a1a;
             font-weight: 600;
         }
+
         .result-item .info {
             margin-top: 8px;
             font-size: 14px;
@@ -218,16 +256,19 @@
             padding: 0 5px;
             margin-bottom: 15px;
         }
+
         .result-item .rating {
             color: #e09015;
             font-weight: bold;
         }
+
         .result-item .button-group {
             margin-top: auto;
             display: flex;
             gap: 10px;
             padding: 10px 5px;
         }
+
         .result-item .btn-detail {
             flex: 1;
             background: #3498db;
@@ -241,9 +282,11 @@
             text-align: center;
             transition: all 0.3s;
         }
+
         .result-item .btn-detail:hover {
             background: #2980b9;
         }
+
         .result-item .btn-crawl {
             flex: 1;
             background: #27ae60;
@@ -255,19 +298,22 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+
         .result-item .btn-crawl:hover {
             background: #219a52;
         }
+
         .collapsible {
             background: white;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             margin-top: 30px;
             max-width: 1000px;
             margin-left: auto;
             margin-right: auto;
         }
+
         .collapsible-header {
             display: flex;
             justify-content: space-between;
@@ -277,72 +323,120 @@
             border-radius: 8px;
             transition: background-color 0.3s;
         }
+
         .collapsible-header:hover {
             background-color: #f8f9fa;
         }
+
         .collapsible-header h3 {
             margin: 0;
             color: #2c3e50;
             font-weight: 500;
         }
+
         .collapsible-header .subtitle {
             font-size: 14px;
             color: #666;
             margin-top: 5px;
         }
+
         .collapsible-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.3s ease-out;
         }
+
         .collapsible-content.expanded {
             max-height: 600px;
             overflow-y: auto;
         }
+
         .collapsible-content::-webkit-scrollbar {
             width: 8px;
         }
+
         .collapsible-content::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
+
         .collapsible-content::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 4px;
         }
+
         .collapsible-content::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
         .collapsible-header .toggle-icon {
             transition: transform 0.3s;
         }
+
         .collapsible-header.expanded .toggle-icon {
             transform: rotate(180deg);
         }
+
         .search-results-container {
             background-color: #e8f4f8;
         }
+
         .crawled-list-container {
             background-color: #f0f7e6;
         }
+
         .crawled-items-container {
             min-height: 100px;
             max-height: 600px;
             overflow-y: auto;
         }
+
         .crawled-items-container::-webkit-scrollbar {
             width: 8px;
         }
+
         .crawled-items-container::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
+
         .crawled-items-container::-webkit-scrollbar-thumb {
             background: #888;
             border-radius: 4px;
         }
+
         .crawled-items-container::-webkit-scrollbar-thumb:hover {
             background: #555;
+        }
+
+        .dropdown-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .dropdown-header {
+            padding: 15px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dropdown-header:hover {
+            background-color: #e9ecef;
+        }
+
+        .dropdown-content {
+            padding: 10px;
+            background-color: white;
+        }
+
+        .dropdown-arrow {
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
@@ -362,7 +456,7 @@
                 <input type="text" id="input_search_text" class="form-control" placeholder="请输入关键词">
             </div>
             <button id="submit_search" class="btn btn-primary mt-4" onclick="WebCrawler()">搜索🔍</button>
-            
+
             <div class="text-muted mt-2" style="font-size: 14px; text-align: center;">
                 提示：搜索后点击搜索结果中的项目即可开始爬取
             </div>
@@ -398,7 +492,7 @@
 
     <script>
         var input_search_text = "";
-        
+
         // 显示状态信息
         function showStatus(message, type) {
             const statusBox = document.getElementById('status_box');
@@ -424,57 +518,97 @@
                     const data = await response.json();
                     const container = document.getElementById('crawled_items');
                     container.innerHTML = '';
-                    
+
                     // 分类显示书籍和电影
                     const books = data.items.filter(item => item.type === 'book');
                     const movies = data.items.filter(item => item.type === 'movie');
-                    
-                    // 显示书籍
+
+                    // 创建书籍下拉框
                     if (books.length > 0) {
-                        const booksDiv = document.createElement('div');
-                        booksDiv.className = 'crawled-section';
-                        booksDiv.innerHTML = '<h4 style="color: #2980b9; margin-bottom: 15px;">📚 已爬取书籍</h4>';
+                        const booksSection = document.createElement('div');
+                        booksSection.className = 'dropdown-section';
+
+                        const booksHeader = document.createElement('div');
+                        booksHeader.className = 'dropdown-header';
+                        booksHeader.innerHTML = `
+                    <h4 style="color: #2980b9; display: inline-block; margin-right: 10px;">📚 已爬取书籍 (${books.length})</h4>
+                    <span class="dropdown-arrow">▼</span>
+                `;
+
+                        const booksContent = document.createElement('div');
+                        booksContent.className = 'dropdown-content';
+                        booksContent.style.display = 'none';
+
                         books.forEach(item => {
                             const div = document.createElement('div');
                             div.className = 'crawled-item';
                             div.innerHTML = `
-                                <div class="title">
-                                    <span>${item.name}</span>
-                                    <span class="type-badge type-book">书籍</span>
-                                </div>
-                                <div class="info">
-                                    <div>ID: ${item.id}</div>
-                                </div>
-                                <a href="/v1/${item.type}/data/${item.id}" class="detail-link">查看详情</a>
-                            `;
-                            booksDiv.appendChild(div);
+                        <div class="title">
+                            <span>${item.name}</span>
+                            <span class="type-badge type-book">书籍</span>
+                        </div>
+                        <div class="info">
+                            <div>ID: ${item.id}</div>
+                        </div>
+                        <a href="/v1/${item.type}/data/${item.id}" class="detail-link">查看详情</a>
+                    `;
+                            booksContent.appendChild(div);
                         });
-                        container.appendChild(booksDiv);
+
+                        booksHeader.addEventListener('click', () => {
+                            booksContent.style.display = booksContent.style.display === 'none' ? 'block' : 'none';
+                            booksHeader.querySelector('.dropdown-arrow').textContent =
+                                booksContent.style.display === 'none' ? '▼' : '▲';
+                        });
+
+                        booksSection.appendChild(booksHeader);
+                        booksSection.appendChild(booksContent);
+                        container.appendChild(booksSection);
                     }
-                    
-                    // 显示电影
+
+                    // 创建电影下拉框
                     if (movies.length > 0) {
-                        const moviesDiv = document.createElement('div');
-                        moviesDiv.className = 'crawled-section';
-                        moviesDiv.innerHTML = '<h4 style="color: #27ae60; margin-bottom: 15px;">🎬 已爬取电影</h4>';
+                        const moviesSection = document.createElement('div');
+                        moviesSection.className = 'dropdown-section';
+
+                        const moviesHeader = document.createElement('div');
+                        moviesHeader.className = 'dropdown-header';
+                        moviesHeader.innerHTML = `
+                    <h4 style="color: #27ae60; display: inline-block; margin-right: 10px;">🎬 已爬取电影 (${movies.length})</h4>
+                    <span class="dropdown-arrow">▼</span>
+                `;
+
+                        const moviesContent = document.createElement('div');
+                        moviesContent.className = 'dropdown-content';
+                        moviesContent.style.display = 'none';
+
                         movies.forEach(item => {
                             const div = document.createElement('div');
                             div.className = 'crawled-item';
                             div.innerHTML = `
-                                <div class="title">
-                                    <span>${item.name}</span>
-                                    <span class="type-badge type-movie">电影</span>
-                                </div>
-                                <div class="info">
-                                    <div>ID: ${item.id}</div>
-                                </div>
-                                <a href="/v1/${item.type}/data/${item.id}" class="detail-link">查看详情</a>
-                            `;
-                            moviesDiv.appendChild(div);
+                        <div class="title">
+                            <span>${item.name}</span>
+                            <span class="type-badge type-movie">电影</span>
+                        </div>
+                        <div class="info">
+                            <div>ID: ${item.id}</div>
+                        </div>
+                        <a href="/v1/${item.type}/data/${item.id}" class="detail-link">查看详情</a>
+                    `;
+                            moviesContent.appendChild(div);
                         });
-                        container.appendChild(moviesDiv);
+
+                        moviesHeader.addEventListener('click', () => {
+                            moviesContent.style.display = moviesContent.style.display === 'none' ? 'block' : 'none';
+                            moviesHeader.querySelector('.dropdown-arrow').textContent =
+                                moviesContent.style.display === 'none' ? '▼' : '▲';
+                        });
+
+                        moviesSection.appendChild(moviesHeader);
+                        moviesSection.appendChild(moviesContent);
+                        container.appendChild(moviesSection);
                     }
-                    
+
                     // 如果没有内容
                     if (books.length === 0 && movies.length === 0) {
                         container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">暂无已爬取内容</div>';
@@ -490,7 +624,7 @@
 
         async function crawlItem(id, type) {
             showStatus('<div class="loading-spinner"></div>正在爬取数据，请稍候...', 'crawling');
-            
+
             try {
                 const endpoint = type === '1' ? '/v1/book/crawl' : '/v1/movie/crawl';
                 const response = await fetch(`http://localhost:8000${endpoint}`, {
@@ -498,7 +632,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: id })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     showStatus('爬取完成！正在跳转...', 'success');
@@ -514,19 +648,19 @@
         async function WebCrawler() {
             const type = document.getElementById('select_book_or_movie').value;
             input_search_text = document.getElementById('input_search_text').value;
-            
+
             if (!input_search_text) {
                 showStatus('请输入搜索关键词', 'error');
                 return;
             }
-            
+
             if (type === "选择类型") {
                 showStatus('请选择爬取类型', 'error');
                 return;
             }
 
             showStatus('<div class="loading-spinner"></div>正在搜索，请稍候...', 'crawling');
-            
+
             try {
                 const endpoint = type === '1' ? '/v1/book/search' : '/v1/movie/search';
                 const response = await fetch(`http://localhost:8000${endpoint}`, {
@@ -534,17 +668,17 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ search_text: input_search_text })
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     const resultsDiv = document.querySelector('.search-results');
                     resultsDiv.innerHTML = '';
-                    
+
                     if (data.results && data.results.length > 0) {
                         data.results.forEach(item => {
                             const itemDiv = document.createElement('div');
                             itemDiv.className = 'result-item';
-                            
+
                             // 根据类型（书籍/电影）显示不同的信息
                             const infoHtml = type === '1' ? `
                                 <div class="name">${item.name}</div>
@@ -563,7 +697,7 @@
                                     <div class="rating">评分：${item.rating}</div>
                                 </div>
                             `;
-                            
+
                             itemDiv.innerHTML = `
                                 <img src="${item.image}" alt="${item.name}">
                                 ${infoHtml}
