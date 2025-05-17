@@ -35,6 +35,36 @@ def save_to_file(data, type):
     with open(path + "/" + filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
+def download_search_cache_image(image_url, item_id, is_book=True):
+    try:
+        if not image_url or image_url in ["None", None]:
+            return "/book_image/no_image.png" if is_book else "/movie_image/no_movie_image.png"
+        # 创建search_cache目录
+        cache_dir = "static/search_cache"
+        if not os.path.exists(cache_dir):
+            os.makedirs(cache_dir)
+        # 用图片url的hash或item_id命名，防止重复
+        ext = os.path.splitext(image_url)[1]
+        if not ext or len(ext) > 5:
+            ext = ".jpg"
+        filename = f"{item_id}{ext}"
+        local_path = os.path.join(cache_dir, filename)
+        if not os.path.exists(local_path):
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Referer': 'https://book.douban.com/' if is_book else 'https://movie.douban.com/'
+            }
+            resp = requests.get(image_url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                with open(local_path, 'wb') as f:
+                    f.write(resp.content)
+            else:
+                return "/book_image/no_image.png" if is_book else "/movie_image/no_movie_image.png"
+        return f"/static/search_cache/{filename}"
+    except Exception as e:
+        print(f"下载search_cache图片出错: {e}")
+        return "/book_image/no_image.png" if is_book else "/movie_image/no_movie_image.png"
+
 @app.route("/v1/index", methods=["GET"])
 async def home(request):
     template = env.get_template("index.html")
@@ -45,7 +75,74 @@ async def search_book(request):
     try:
         data = request.json
         search_text = data["search_text"]
-        book_id = book_crawler.book_searcher(search_text)[0]
+        book_ids = book_crawler.book_searcher(search_text)
+        
+        # 获取每个书籍的基本信息
+        search_results = []
+        for book_id in book_ids:
+            try:
+                book_info = book_crawler.get_book_info(book_id)
+                # 下载图片到search_cache
+                cache_img = download_search_cache_image(book_info["book_image"], book_id, is_book=True)
+                search_results.append({
+                    "id": book_id,
+                    "name": book_info["book_name"],
+                    "image": cache_img,
+                    "author": book_info["book_author"],
+                    "publisher": book_info["book_publisher"],
+                    "rating": book_info["book_rating"],
+                    "publish_date": book_info["book_date"]
+                })
+            except Exception as e:
+                print(f"获取书籍 {book_id} 信息时出错: {e}")
+                continue
+                
+        return response.json({
+            "status": "success",
+            "results": search_results
+        })
+    except Exception as e:
+        return response.json({"error": str(e)}, status=500)
+    
+@app.route("/v1/movie/search", methods=["POST"])
+async def search_movie(request):
+    try:
+        data = request.json
+        search_text = data["search_text"]
+        movie_ids = movie_crawler.movie_searcher(search_text)
+        
+        # 获取每个电影的基本信息
+        search_results = []
+        for movie_id in movie_ids:
+            try:
+                movie_info = movie_crawler.get_movie_info(movie_id)
+                # 下载图片到search_cache
+                cache_img = download_search_cache_image(movie_info["movie_image"], movie_id, is_book=False)
+                search_results.append({
+                    "id": movie_id,
+                    "name": movie_info["movie_name"],
+                    "image": cache_img,
+                    "director": movie_info["movie_director"],
+                    "rating": movie_info["movie_rating"],
+                    "release_date": movie_info["movie_date"],
+                    "type": movie_info["movie_type"]
+                })
+            except Exception as e:
+                print(f"获取电影 {movie_id} 信息时出错: {e}")
+                continue
+                
+        return response.json({
+            "status": "success",
+            "results": search_results
+        })
+    except Exception as e:
+        return response.json({"error": str(e)}, status=500)
+
+@app.route("/v1/book/crawl", methods=["POST"])
+async def crawl_book(request):
+    try:
+        data = request.json
+        book_id = data["id"]
         print(f"正在爬取ID为 {book_id} 的书籍数据...")
         book_data = book_crawler.get_book_data(id=book_id)
         async with httpx.AsyncClient() as client:
@@ -62,15 +159,22 @@ async def search_book(request):
         })
     except Exception as e:
         return response.json({"error": str(e)}, status=500)
-    
-@app.route("/v1/movie/search", methods=["POST"])
-async def search_movie(request):
+
+@app.route("/v1/movie/crawl", methods=["POST"])
+async def crawl_movie(request):
     try:
         data = request.json
-        search_text = data["search_text"]
-        movie_id = movie_crawler.movie_searcher(search_text)[0]
+        movie_id = data["id"]
         print(f"正在爬取ID为 {movie_id} 的电影数据...")
         movie_data = movie_crawler.get_movie_data(id=movie_id)
+        
+        # 下载并更新图片路径
+        movie_image = movie_data.get('movie_image')
+        if movie_image is None or movie_image == "None":
+            movie_data['movie_image'] = "/movie_image/no_movie_image.png"
+        else:
+            movie_data['movie_image'] = download_movie_image(movie_image, movie_id)
+            
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(
                 "http://localhost:8000/v1/movie/crawled/upload",
@@ -90,7 +194,7 @@ def download_book_image(image_url, book_id):
     try:
         # 如果是默认图片路径或None，直接返回默认图片
         if image_url == "/book_image/no_image.png" or image_url is None or image_url == "None":
-            return "/book_image/no_image.png"
+            return "/book_image/no_book_image.png"
             
         # 如果没有图片URL，返回默认图片
         if not image_url:
@@ -134,7 +238,7 @@ def download_movie_image(image_url, movie_id):
     try:
         # 如果是默认图片路径或None，直接返回默认图片
         if image_url == "/movie_image/no_image.png" or image_url is None or image_url == "None":
-            return "/movie_image/no_image.png"
+            return "/movie_image/no_movie_image.png"
             
         # 如果没有图片URL，返回默认图片
         if not image_url:
@@ -196,7 +300,7 @@ async def get_book_data(request, book_id):
         # 下载并更新图片路径
         book_image = book_data.get('book_image')
         if book_image is None or book_image == "None":
-            book_data['book_image'] = "/book_image/no_image.png"
+            book_data['book_image'] = "/book_image/no_book_image.png"
         else:
             book_data['book_image'] = download_book_image(book_image, book_id)
             
@@ -253,7 +357,7 @@ async def get_movie_data(request, movie_id):
         # 下载并更新图片路径
         movie_image = movie_data.get('movie_image')
         if movie_image is None or movie_image == "None":
-            movie_data['movie_image'] = "/movie_image/no_image.png"
+            movie_data['movie_image'] = "/movie_image/no_movie_image.png"
         else:
             movie_data['movie_image'] = download_movie_image(movie_image, movie_id)
             
@@ -319,8 +423,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=8000,
-        debug=True,
-        request_timeout=60,
-        response_timeout=120,
-        keep_alive_timeout=10,
+        debug=True
     )

@@ -68,7 +68,7 @@ def get_book_info(id):
             
         # 出版日期
         try:
-            book_date = book_infos.find('span', {"class": "pl"}, string='出版年:').next_sibling.get_text().strip()
+            book_date = book_infos.find('span', {"class": "pl"}, string='出版日期:').next_sibling.get_text().strip()
         except (AttributeError, TypeError):
             book_date = "未知出版日期"
             
@@ -90,9 +90,9 @@ def get_book_info(id):
             if img and img.get('src'):
                 book_image = img['src']
             else:
-                book_image = "/static/no_image.png"
+                book_image = "/book_image/no_book_image.png"
         except (AttributeError, KeyError):
-            book_image = "/static/no_image.png"
+            book_image = "/book_image/no_book_image.png"
         
         book_info = {
             "book_id": book_id,
