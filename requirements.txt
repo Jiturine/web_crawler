@@ -12,3 +12,4 @@ addict==2.4.0
 datasets=2.16.0
 fake_useragent==2.2.0
 httpx==0.28.1
+PyMySQL==1.1.1

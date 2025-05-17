@@ -6,6 +6,7 @@ import re
 from headers import headers
 from emotion_classification import classify_text
 
+
 def book_searcher(search_text):
     '''根据关键词搜索书籍对应的url列表'''
     url = f"https://search.douban.com/book/subject_search?search_text={search_text}&cat=1002"
@@ -16,9 +17,11 @@ def book_searcher(search_text):
     lst = rein.findall(ori)
     return lst
 
+
 def generate_book_url(id):
     '''根据id生成书籍的url'''
     return f"https://book.douban.com/subject/{id}/"
+
 
 def get_book_data(id):
     '''获取书籍的爬虫数据 (包括书籍基本信息和评论信息)'''
@@ -26,16 +29,18 @@ def get_book_data(id):
     data["comment_list"] = get_book_comments(id, 100)
     return data
 
+
 def get_book_info(id):
     '''获取书籍的基本信息'''
     try:
         base_url = generate_book_url(id)
         resp = requests.get(base_url, headers=headers)
         bs = BeautifulSoup(resp.text, 'html.parser')
-        
+
         # 获取基本信息
         try:
-            book_info_json_str = bs.find("script", {"type": "application/ld+json"}).get_text()
+            book_info_json_str = bs.find(
+                "script", {"type": "application/ld+json"}).get_text()
             book_info_json = json.loads(book_info_json_str)
             book_url = book_info_json["url"]
             book_id = book_url.split("/")[-2]
@@ -43,47 +48,54 @@ def get_book_info(id):
         except (AttributeError, KeyError, json.JSONDecodeError):
             book_id = id
             book_name = "未知书名"
-        
+
         # 获取详细信息
-        book_infos = bs.find("div", {"id" : "info"})
-        
+        book_infos = bs.find("div", {"id": "info"})
+
         # 作者
         try:
-            author_span = book_infos.find('span', {"class": "pl"}, string=' 作者')
-            book_author = author_span.parent.get_text(strip=True).replace('作者:', '').strip()
+            author_span = book_infos.find(
+                'span', {"class": "pl"}, string=' 作者')
+            book_author = author_span.parent.get_text(
+                strip=True).replace('作者:', '').strip()
         except (AttributeError, TypeError):
             book_author = "未知作者"
-            
+
         # 出版社
         try:
-            book_publisher = book_infos.find('span', {"class": "pl"}, string='出版社:').find_next_sibling('a').get_text().strip()
+            book_publisher = book_infos.find(
+                'span', {"class": "pl"}, string='出版社:').find_next_sibling('a').get_text().strip()
         except (AttributeError, TypeError):
             book_publisher = "未知出版社"
-            
+
         # 价格
         try:
-            book_price = book_infos.find('span', {"class": "pl"}, string='定价:').next_sibling.get_text().strip()
+            book_price = book_infos.find(
+                'span', {"class": "pl"}, string='定价:').next_sibling.get_text().strip()
         except (AttributeError, TypeError):
             book_price = "暂无价格"
-            
+
         # 出版日期
         try:
-            book_date = book_infos.find('span', {"class": "pl"}, string='出版日期:').next_sibling.get_text().strip()
+            book_date = book_infos.find(
+                'span', {"class": "pl"}, string='出版日期:').next_sibling.get_text().strip()
         except (AttributeError, TypeError):
             book_date = "未知出版日期"
-            
+
         # ISBN
         try:
-            book_isbn = book_infos.find('span', {"class": "pl"}, string='ISBN:').next_sibling.get_text().strip()
+            book_isbn = book_infos.find(
+                'span', {"class": "pl"}, string='ISBN:').next_sibling.get_text().strip()
         except (AttributeError, TypeError):
             book_isbn = "未知ISBN"
-            
+
         # 评分
         try:
-            book_rating = bs.find("div", {"id": "interest_sectl"}).find("strong").get_text().strip()
+            book_rating = bs.find("div", {"id": "interest_sectl"}).find(
+                "strong").get_text().strip()
         except (AttributeError, TypeError):
             book_rating = "暂无评分"
-        
+
         # 获取书籍图片URL
         try:
             img = bs.find("div", {"id": "mainpic"}).find("a").find("img")
@@ -93,7 +105,7 @@ def get_book_info(id):
                 book_image = "/book_image/no_book_image.png"
         except (AttributeError, KeyError):
             book_image = "/book_image/no_book_image.png"
-        
+
         book_info = {
             "book_id": book_id,
             "book_name": book_name,
@@ -121,6 +133,7 @@ def get_book_info(id):
             "book_image": "/book_image/no_book_image.png"
         }
 
+
 def get_book_comments(id, count):
     '''获取书籍的评论信息'''
     try:
@@ -128,7 +141,8 @@ def get_book_comments(id, count):
         i = 0
         base_url = generate_book_url(id)
         while (i < count):
-            urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=hotest".format(i))
+            urls.append(base_url + "comments/" +
+                        "?start={0}&limit=20&status=P&sort=hotest".format(i))
             i += 20
         comments = []
         comment_count = 0
@@ -142,42 +156,49 @@ def get_book_comments(id, count):
                         comment_id = comment_item["data-cid"]
                     except KeyError:
                         comment_id = f"comment_{comment_count}"
-                        
+
                     try:
                         avatar = comment_item.find("div", {"class": "avatar"})
                         comment_username = avatar.find("a")["title"]
                     except (AttributeError, KeyError):
                         comment_username = "匿名用户"
-                        
+
                     try:
-                        comment = comment_item.find("div", {"class": "comment"})
-                        comment_isuseful = int(comment.find("span", {"class": "vote-count"}).get_text())
+                        comment = comment_item.find(
+                            "div", {"class": "comment"})
+                        comment_isuseful = int(comment.find(
+                            "span", {"class": "vote-count"}).get_text())
                     except (AttributeError, ValueError):
                         comment_isuseful = 0
-                        
+
                     try:
-                        comment_time_str = comment.find("a", {"class": "comment-time"}).get_text()
-                        comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
+                        comment_time_str = comment.find(
+                            "a", {"class": "comment-time"}).get_text()
+                        comment_time = time.strptime(
+                            comment_time_str, "%Y-%m-%d %H:%M:%S")
                         comment_timestamp = int(time.mktime(comment_time))
                     except (AttributeError, ValueError):
                         comment_timestamp = int(time.time())
-                        
+
                     try:
-                        comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
+                        comment_content = comment.find(
+                            "p", {"class": "comment-content"}).get_text().strip()
                     except AttributeError:
                         comment_content = "评论内容获取失败"
-                        
+
                     try:
-                        match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
-                        comment_rating = int((match.group(1))) // 10 if match else 0
+                        match = re.search(r'allstar(\d{2})', str(
+                            comment.find("span", {"class": "comment-info"})))
+                        comment_rating = int(
+                            (match.group(1))) // 10 if match else 0
                     except (AttributeError, ValueError):
                         comment_rating = 0
-                        
+
                     try:
                         comment_ispositive = classify_text(comment_content)
                     except Exception:
                         comment_ispositive = 0
-                        
+
                     comments.append({
                         "comment_id": comment_id,
                         "comment_username": comment_username,
@@ -193,7 +214,7 @@ def get_book_comments(id, count):
             except Exception as e:
                 print(f"获取评论页面时出错: {e}")
                 continue
-                
+
         return comments
     except Exception as e:
         print(f"获取评论列表时出错: {e}")
