@@ -35,22 +35,24 @@
         }
 
         .book-meta {
-            color: #666;
-            font-size: 14px;
+            color: #333;
+            font-size: 16px;
             padding-left: 40px;
         }
 
         .book-meta p {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            line-height: 1.6;
         }
 
         .book-meta strong {
             color: #333;
-            margin-right: 12px;
+            margin-right: 8px;
+            font-weight: 600;
         }
 
         .section-title {
-            font-size: 18px;
+            font-size: 20px;
             color: #333;
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
@@ -93,33 +95,48 @@
         }
 
         .book-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .book-author {
             color: #666;
-            font-size: 16px;
+            font-size: 18px;
             margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            margin-bottom: 20px;
+        }
+
+        .action-buttons .btn {
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="container mt-4">
+        <div class="action-buttons">
+            <a href="/v1/index" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door"></i> 返回首页
+            </a>
+        </div>
+
         <h1 class="book-title">{{ book.book_name }}</h1>
         <div class="book-author">{{ book.book_author }}</div>
         <div class="mb-3">
-            <a href="https://book.douban.com/subject/{{ book.book_id }}/" target="_blank" class="btn btn-outline-primary">
+            <a href="https://book.douban.com/subject/{{ book.book_id }}/" target="_blank"
+                class="btn btn-outline-primary">
                 <i class="bi bi-box-arrow-up-right"></i> 在豆瓣查看详情
             </a>
         </div>
 
         <!-- 书籍基本信息 -->
         <div class="book-info">
-            <div class="row">
+            <div class="row align-items-center">
                 <div class="col-md-3 text-center">
                     <img src="{{ book.book_image }}" alt="{{ book.book_name }}" class="book-image">
                     <div class="mt-3">
@@ -127,23 +144,22 @@
                         <div class="rating-stars">
                             {% set rating = book.book_rating|float %}
                             {% for i in range(5) %}
-                                {% if i < rating|int %}
-                                    <i class="bi bi-star-fill"></i>
-                                {% elif i < rating|int + 1 and rating % 1 >= 0.5 %}
+                            {% if i < rating|int %} <i class="bi bi-star-fill"></i>
+                                {% elif i < rating|int + 1 and rating % 1>= 0.5 %}
                                     <i class="bi bi-star-half"></i>
-                                {% else %}
+                                    {% else %}
                                     <i class="bi bi-star"></i>
-                                {% endif %}
-                            {% endfor %}
+                                    {% endif %}
+                                    {% endfor %}
                         </div>
                     </div>
                 </div>
                 <div class="col-md-9">
                     <div class="book-meta">
+                        <p><strong>作者：</strong>{{ book.book_author or '暂无' }}</p>
                         <p><strong>出版社：</strong>{{ book.book_publisher or '暂无' }}</p>
                         <p><strong>出版日期：</strong>{{ book.book_date or '暂无' }}</p>
-                        <p><strong>ISBN：</strong>{{ book.book_isbn or '暂无' }}</p>
-                        <p><strong>定价：</strong>{{ book.book_price or '暂无' }}</p>
+                        <p><strong>ISBN：</strong>{{ book.book_ISBN or '暂无' }}</p>
                     </div>
                 </div>
             </div>

@@ -11,4 +11,4 @@ DB_CONFIG = {
     'database': 'web_crawler',#数据库名
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
-}
+} 

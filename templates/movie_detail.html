@@ -35,22 +35,24 @@
         }
 
         .movie-meta {
-            color: #666;
-            font-size: 14px;
+            color: #333;
+            font-size: 16px;
             padding-left: 40px;
         }
 
         .movie-meta p {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            line-height: 1.6;
         }
 
         .movie-meta strong {
             color: #333;
-            margin-right: 12px;
+            margin-right: 8px;
+            font-weight: 600;
         }
 
         .section-title {
-            font-size: 18px;
+            font-size: 20px;
             color: #333;
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
@@ -93,22 +95,36 @@
         }
 
         .movie-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .movie-author {
             color: #666;
-            font-size: 16px;
+            font-size: 18px;
             margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            margin-bottom: 20px;
+        }
+
+        .action-buttons .btn {
+            margin-right: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="container mt-4">
+        <div class="action-buttons">
+            <a href="/v1/index" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door"></i> 返回首页
+            </a>
+        </div>
+
         <h1 class="movie-title">{{ movie.movie_name }}</h1>
         <div class="movie-star">{{ movie.movie_star }}</div>
         <div class="mb-3">
@@ -120,7 +136,7 @@
 
         <!-- 电影基本信息 -->
         <div class="movie-info">
-            <div class="row">
+            <div class="row align-items-center">
                 <div class="col-md-3 text-center">
                     <img src="{{ movie.movie_image }}" alt="{{ movie.movie_name }}" class="movie-image">
                     <div class="mt-3">

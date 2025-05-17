@@ -6,7 +6,6 @@ from pymysql import Error
 from db_config import DB_CONFIG
 from datetime import datetime
 
-
 class DatabaseOperations:
     def __init__(self):
         self.connection = None
@@ -41,7 +40,7 @@ class DatabaseOperations:
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
-
+                
                 # 创建book_comments表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS book_comments (
@@ -75,7 +74,7 @@ class DatabaseOperations:
                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
-
+                
                 # 创建movie_comments表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS movie_comments (
@@ -128,7 +127,7 @@ class DatabaseOperations:
                     book_data["book_rating"],
                     book_data["book_image"]
                 ))
-
+                
                 # 插入评论数据
                 for comment in book_data.get("comment_list", []):
                     cursor.execute("""
@@ -154,14 +153,14 @@ class DatabaseOperations:
                         comment["comment_isuseful"],
                         comment["comment_ispositive"]
                     ))
-
+                
                 self.connection.commit()
                 return True
         except Exception as e:
             print(f"保存数据时出错: {e}")
             self.connection.rollback()
             return False
-
+    
     def save_movie_data(self, movie_data):
         """保存电影数据到数据库"""
         try:
@@ -195,7 +194,7 @@ class DatabaseOperations:
                     movie_data["movie_IMDb"],
                     movie_data["movie_image"]
                 ))
-
+                
                 # 插入评论数据
                 for comment in movie_data.get("comment_list", []):
                     cursor.execute("""
@@ -221,7 +220,7 @@ class DatabaseOperations:
                         comment["comment_isuseful"],
                         comment["comment_ispositive"]
                     ))
-
+                
                 self.connection.commit()
                 return True
         except Exception as e:
@@ -233,18 +232,15 @@ class DatabaseOperations:
         try:
             with self.connection.cursor() as cursor:
                 # 查询书籍信息
-                cursor.execute(
-                    "SELECT * FROM books WHERE book_id = %s", (book_id,))
+                cursor.execute("SELECT * FROM books WHERE book_id = %s", (book_id,))
                 book = cursor.fetchone()
-
+                
                 if book:
                     # 查询评论信息
-                    cursor.execute(
-                        "SELECT * FROM book_comments WHERE book_id = %s", (book_id,))
+                    cursor.execute("SELECT * FROM book_comments WHERE book_id = %s", (book_id,))
                     comments = cursor.fetchall()
                     for comment in comments:
-                        comment['comment_time'] = datetime.fromtimestamp(
-                            comment['comment_timestamp'])
+                        comment['comment_time'] = datetime.fromtimestamp(comment['comment_timestamp'])
                     book['comment_list'] = comments
                     return book
                 return None
@@ -256,18 +252,15 @@ class DatabaseOperations:
         try:
             with self.connection.cursor() as cursor:
                 # 查询电影信息
-                cursor.execute(
-                    "SELECT * FROM movies WHERE movie_id = %s", (movie_id,))
+                cursor.execute("SELECT * FROM movies WHERE movie_id = %s", (movie_id,))
                 movie = cursor.fetchone()
-
+                
                 if movie:
                     # 查询评论信息
-                    cursor.execute(
-                        "SELECT * FROM movie_comments WHERE movie_id = %s", (movie_id,))
+                    cursor.execute("SELECT * FROM movie_comments WHERE movie_id = %s", (movie_id,))
                     comments = cursor.fetchall()
                     for comment in comments:
-                        comment['comment_time'] = datetime.fromtimestamp(
-                            comment['comment_timestamp'])
+                        comment['comment_time'] = datetime.fromtimestamp(comment['comment_timestamp'])
                     movie['comment_list'] = comments
                     return movie
                 return None

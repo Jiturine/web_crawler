@@ -1,8 +1,9 @@
-### 注：index.html中有本地测试所用的localhost的IP，换到云服务器记得改
-### 期望在云服务器也安装mysql数据库
+### 更新 前端游湖+超时处理+鸽注册登录系统+动态获取headers
 
 ### 更新 在test_client.py更新了查看已爬目录和爬取的选择 增加了book_detail的渲染内容
 ### 更新 将book_crawler 改为 web_crawler，增加影评数据表
+
+### 期望在云服务器也安装mysql数据库
 
 ## **Linux系统**安装**mysql**数据库：
 ```bash
