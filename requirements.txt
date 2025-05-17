@@ -10,3 +10,5 @@ sanic==25.3.0
 wordcloud==1.9.4
 addict==2.4.0
 datasets=2.16.0
+fake_useragent==2.2.0
+httpx==0.28.1
