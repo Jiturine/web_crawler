@@ -288,5 +288,39 @@ async def get_movie_data(request, movie_id):
     else:
         return response.json({"code": -1, "message": "未找到电影数据"}, status=404)
 
+@app.route("/v1/crawled/items", methods=["GET"])
+async def get_crawled_items(request):
+    try:
+        with db.connection.cursor() as cursor:
+            # 获取已爬取的书籍
+            cursor.execute("SELECT book_id, book_name FROM books")
+            books = cursor.fetchall()
+            # 获取已爬取的电影
+            cursor.execute("SELECT movie_id, movie_name FROM movies")
+            movies = cursor.fetchall()
+            items = []
+            for book in books:
+                items.append({
+                    "id": book['book_id'],
+                    "name": book['book_name'],
+                    "type": "book"
+                })
+            for movie in movies:
+                items.append({
+                    "id": movie['movie_id'],
+                    "name": movie['movie_name'],
+                    "type": "movie"
+                })
+            return response.json({"items": items})
+    except Exception as e:
+        return response.json({"error": str(e)}, status=500)
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=8000,
+        debug=True,
+        request_timeout=60,
+        response_timeout=120,
+        keep_alive_timeout=10,
+    )

@@ -7,7 +7,7 @@ DB_CONFIG = {
     'host': 'localhost',#服务器IP地址
     'port': 3306,#端口
     'user': 'root',
-    'password': 'zzy051007',
+    'password': '123456',
     'database': 'web_crawler',
     'charset': 'utf8mb4',
     'cursorclass': pymysql.cursors.DictCursor
