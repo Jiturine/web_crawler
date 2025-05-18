@@ -4,7 +4,7 @@ import requests
 import time
 import re
 from headers import headers
-from emotion_classification import classify_text
+from emotion_classification import classify_text, classify
 
 def book_searcher(search_text):
     '''根据关键词搜索书籍对应的url列表'''
@@ -137,6 +137,7 @@ def get_book_comments(id, count):
                 resp = requests.get(url, headers=headers)
                 bs = BeautifulSoup(resp.text, 'html.parser')
                 comment_items = bs.find_all("li", {"class": "comment-item"})
+                comment_texts = {}
                 for comment_item in comment_items:
                     try:
                         comment_id = comment_item["data-cid"]
@@ -173,10 +174,12 @@ def get_book_comments(id, count):
                     except (AttributeError, ValueError):
                         comment_rating = 0
                         
-                    try:
-                        comment_ispositive = classify_text(comment_content)
-                    except Exception:
-                        comment_ispositive = 0
+                    # try:
+                    #     comment_ispositive = classify_text(comment_content)
+                    # except Exception:
+                    #     comment_ispositive = 0
+                    
+                    comment_texts[comment_id] = comment_content
                         
                     comments.append({
                         "comment_id": comment_id,
@@ -185,11 +188,17 @@ def get_book_comments(id, count):
                         "comment_rating": comment_rating,
                         "comment_content": comment_content,
                         "comment_isuseful": comment_isuseful,
-                        "comment_ispositive": comment_ispositive
+                        "comment_ispositive": 1
                     })
                     comment_count += 1
                     if comment_count >= count:
                         break
+                classify_results = classify(comment_texts)
+                for result in classify_results:
+                    for comment in comments:
+                        if result['comment_id'] == comment['comment_id']:
+                            comment['comment_ispositive'] = result['is_positive']
+                
             except Exception as e:
                 print(f"获取评论页面时出错: {e}")
                 continue
