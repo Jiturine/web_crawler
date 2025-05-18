@@ -1,4 +1,6 @@
-### 更新 前端游湖+超时处理+鸽注册登录系统+动态获取headers
+### 更新 此区域划分为本地测试 本地运行test_sanic.py即可测试
+
+### 更新 前端优化+超时处理+鸽注册登录系统+动态获取headers
 
 ### 更新 在test_client.py更新了查看已爬目录和爬取的选择 增加了book_detail的渲染内容
 ### 更新 将book_crawler 改为 web_crawler，增加影评数据表
