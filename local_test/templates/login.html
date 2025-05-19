@@ -110,13 +110,18 @@
                 });
                 
                 const data = await response.json();
+                console.log('Login response:', data); // 调试日志
                 
                 if (response.ok) {
                     // 保存token和用户名
-                    localStorage.setItem('token', data.token);
+                    const token = data.token;
+                    console.log('Saving token:', token); // 调试日志
+                    localStorage.setItem('token', token);
                     localStorage.setItem('username', data.user.username);
+                    
                     // 显示成功提示
                     alert('登录成功！');
+                    
                     // 跳转到首页
                     window.location.href = '/v1/index';
                 } else {
@@ -124,6 +129,7 @@
                     errorMessage.style.display = 'block';
                 }
             } catch (error) {
+                console.error('Login error:', error); // 调试日志
                 errorMessage.textContent = '登录失败，请稍后重试';
                 errorMessage.style.display = 'block';
             }

@@ -15,7 +15,7 @@ class DatabaseOperations:
         try:
             self.connection = pymysql.connect(**DB_CONFIG)
             if self.connection.open:
-                print("成功连接到MySQL数据�?")
+                print("成功连接到MySQL数据库")
                 self.create_tables()
         except Error as e:
             print(f"连接数据库时出错: {e}")
@@ -24,7 +24,7 @@ class DatabaseOperations:
         """创建必要的数据表"""
         try:
             with self.connection.cursor() as cursor:
-                # 创建users�?
+                # 创建users表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS users (
                         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +34,7 @@ class DatabaseOperations:
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
                 
-                # 创建books�?
+                # 创建books表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS books (
                         book_id VARCHAR(20) PRIMARY KEY,
@@ -51,7 +51,7 @@ class DatabaseOperations:
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
                 
-                # 创建book_comments�?
+                # 创建book_comments表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS book_comments (
                         comment_id VARCHAR(50) PRIMARY KEY,
@@ -67,7 +67,7 @@ class DatabaseOperations:
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
 
-                # 创建movies�?
+                # 创建movies表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS movies (
                         movie_id VARCHAR(20) PRIMARY KEY,
@@ -85,7 +85,7 @@ class DatabaseOperations:
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
                 
-                # 创建movie_comments�?
+                # 创建movie_comments表
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS movie_comments (
                         comment_id VARCHAR(50) PRIMARY KEY,
@@ -101,7 +101,7 @@ class DatabaseOperations:
                     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """)
                 self.connection.commit()
-                print("数据表创建成�?")
+                print("数据表创建成功")
         except Exception as e:
             print(f"创建数据表时出错: {e}")
             self.connection.rollback()
@@ -110,7 +110,7 @@ class DatabaseOperations:
         """保存书籍数据到数据库"""
         try:
             with self.connection.cursor() as cursor:
-                # 插入或更新书籍信�?
+                # 插入或更新书籍信息
                 cursor.execute("""
                     INSERT INTO books (
                         book_id, book_name, book_author, book_isbn, 
@@ -167,7 +167,7 @@ class DatabaseOperations:
                 self.connection.commit()
                 return True
         except Exception as e:
-            print(f"保存数据时出�?: {e}")
+            print(f"保存数据时出错: {e}")
             self.connection.rollback()
             return False
     
@@ -175,7 +175,7 @@ class DatabaseOperations:
         """保存电影数据到数据库"""
         try:
             with self.connection.cursor() as cursor:
-                # 插入或更新电影信�?
+                # 插入或更新电影信息
                 cursor.execute("""
                     INSERT INTO movies (
                         movie_id, movie_name, movie_director, movie_scriptwriter, movie_star,
@@ -234,7 +234,7 @@ class DatabaseOperations:
                 self.connection.commit()
                 return True
         except Exception as e:
-            print(f"保存数据时出�?: {e}")
+            print(f"保存数据时出错: {e}")
             self.connection.rollback()
             return False
 
@@ -255,7 +255,7 @@ class DatabaseOperations:
                     return book
                 return None
         except Error as e:
-            print(f"查询数据时出�?: {e}")
+            print(f"查询数据时出错: {e}")
             return None
 
     def get_movie_data(self, movie_id):
@@ -285,17 +285,17 @@ class DatabaseOperations:
                     return movie
                 return None
         except Error as e:
-            print(f"查询电影数据时出�?: {e}")
+            print(f"查询电影数据时出错: {e}")
             return None
 
     def close(self):
-        """关闭数据库连�?"""
+        """关闭数据库连接"""
         if self.connection:
             self.connection.close()
             print("MySQL数据库连接已关闭")
 
     def get_user_by_username(self, username):
-        """根据用户名查找用�?"""
+        """根据用户名查找用户"""
         try:
             with self.connection.cursor(pymysql.cursors.DictCursor) as cursor:
                 sql = "SELECT * FROM users WHERE username = %s"
@@ -306,7 +306,7 @@ class DatabaseOperations:
             return None
 
     def create_user(self, username, password):
-        """创建新用�?"""
+        """创建新用户"""
         try:
             with self.connection.cursor() as cursor:
                 sql = "INSERT INTO users (username, password) VALUES (%s, %s)"
@@ -314,15 +314,21 @@ class DatabaseOperations:
                 self.connection.commit()
                 return True
         except Exception as e:
-            print(f"创建用户时出�?: {e}")
+            print(f"创建用户时出错: {e}")
             self.connection.rollback()
             return False
 
     def execute_query(self, sql, params=None):
-        with self.connection.cursor() as cursor:
-            cursor.execute(sql, params or ())
-            try:
-                result = cursor.fetchall()
-                return result
-            except:
-                return None
+        """执行SQL查询"""
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql, params or ())
+                if sql.strip().upper().startswith('SELECT'):
+                    return cursor.fetchall()
+                else:
+                    self.connection.commit()
+                    return cursor.rowcount
+        except Exception as e:
+            print(f"执行SQL查询时出错: {e}")
+            self.connection.rollback()
+            return None

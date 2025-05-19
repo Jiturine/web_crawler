@@ -480,7 +480,7 @@
             align-items: center;
             gap: 8px;
         }
-        .collapsible-header .toggle-icon {
+        .toggle-icon {
             transition: transform 0.3s ease;
             font-size: 14px;
             color: #666;
@@ -488,10 +488,12 @@
             border-radius: 4px;
             background: rgba(255, 255, 255, 0.5);
         }
-        .collapsible-header:hover .toggle-icon {
-            background: rgba(255, 255, 255, 0.8);
+        .toggle-icon::before {
+            content: '▼';
+            display: inline-block;
+            transition: transform 0.3s ease;
         }
-        .collapsible-header.expanded .toggle-icon {
+        .collapsible-header.expanded .toggle-icon::before {
             transform: rotate(180deg);
         }
         .collapsible-content {
@@ -746,6 +748,50 @@
             line-height: 1.2;
             word-break: break-all;
         }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            width: 90px;
+            height: 28px;
+            line-height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 
@@ -787,7 +833,7 @@
                 <div>
                     <h3>搜索结果</h3>
                 </div>
-                <span class="toggle-icon">▼</span>
+                <span class="toggle-icon"></span>
             </div>
             <div id="search-results" class="collapsible-content">
                 <div class="search-results" style="display: flex; justify-content: center; align-items: center; min-height: 200px;">
@@ -799,7 +845,7 @@
         <div class="collapsible crawled-list-container">
             <div class="collapsible-header" onclick="toggleCollapsible('crawled-list')">
                 <h3>已爬取内容</h3>
-                <span class="toggle-icon">▼</span>
+                <span class="toggle-icon"></span>
             </div>
             <div id="crawled-list" class="collapsible-content">
                 <div id="crawled_items" class="crawled-items-container">
@@ -807,7 +853,7 @@
                     <div class="collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible('crawled-books')">
                             <h4 style="color: #2980b9; margin: 0;">📚 已爬取书籍</h4>
-                            <span class="toggle-icon">▼</span>
+                            <span class="toggle-icon"></span>
                         </div>
                         <div id="crawled-books" class="collapsible-content expanded">
                             <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取书籍</div>
@@ -818,7 +864,7 @@
                     <div class="collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible('crawled-movies')">
                             <h4 style="color: #27ae60; margin: 0;">🎬 已爬取电影</h4>
-                            <span class="toggle-icon">▼</span>
+                            <span class="toggle-icon"></span>
                         </div>
                         <div id="crawled-movies" class="collapsible-content expanded">
                             <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取电影</div>
@@ -830,7 +876,7 @@
     </div>
 
     <footer class="site-footer">
-        2025春-基于Python的数据爬虫与可视化云服务设计(PBLF) 小组项目
+        2025-基于Python的数据爬虫与可视化云服务设计(PBLF) 小组项目
     </footer>
 
     <script>
@@ -861,7 +907,7 @@
                     return;  // 如果未登录，直接返回
                 }
 
-                const response = await fetch('http://106.52.139.242:8000/v1/crawled/items', {
+                const response = await fetch('http://localhost:8000/v1/crawled/items', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -904,7 +950,7 @@
                                     </div>
                                 </div>
                                 <div class="crawled-item-buttons">
-                                    <a href="/v1/${item.type}/data/${item.id}" class="btn btn-detail">查看详情</a>
+                                    <a href="javascript:void(0)" onclick="viewDetail('${item.type}', '${item.id}')" class="btn btn-detail">查看详情</a>
                                     <button onclick="downloadJson('${item.type}', '${item.id}')" class="btn-download-json">下载JSON</button>
                                     <div class="download-error" id="json-error-${item.id}">
                                         <div style="display: flex; align-items: flex-start; justify-content: space-between;">
@@ -919,6 +965,7 @@
                                             <span class="close-btn" onclick="closeError('csv-error-${item.id}')">×</span>
                                         </div>
                                     </div>
+                                    <button onclick="deleteItem('${item.type}', '${item.id}')" class="btn-delete">删除记录</button>
                                 </div>
                             `;
                             booksContainer.appendChild(div);
@@ -947,7 +994,7 @@
                                     </div>
                                 </div>
                                 <div class="crawled-item-buttons">
-                                    <a href="/v1/${item.type}/data/${item.id}" class="btn btn-detail">查看详情</a>
+                                    <a href="javascript:void(0)" onclick="viewDetail('${item.type}', '${item.id}')" class="btn btn-detail">查看详情</a>
                                     <button onclick="downloadJson('${item.type}', '${item.id}')" class="btn-download-json">下载JSON</button>
                                     <div class="download-error" id="json-error-${item.id}">
                                         <div style="display: flex; align-items: flex-start; justify-content: space-between;">
@@ -962,6 +1009,7 @@
                                             <span class="close-btn" onclick="closeError('csv-error-${item.id}')">×</span>
                                         </div>
                                     </div>
+                                    <button onclick="deleteItem('${item.type}', '${item.id}')" class="btn-delete">删除记录</button>
                                 </div>
                             `;
                             moviesContainer.appendChild(div);
@@ -997,7 +1045,7 @@
         // 下载JSON文件
         async function downloadJson(type, id) {
             try {
-                const response = await fetch(`http://106.52.139.242:8000/v1/${type}/data/${id}`);
+                const response = await fetch(`/v1/${type}/data/${id}`);
                 if (!response.ok) {
                     throw new Error('下载失败');
                 }
@@ -1024,7 +1072,7 @@
         // 下载CSV文件
         async function downloadCsv(type, id) {
             try {
-                const response = await fetch(`http://106.52.139.242:8000/v1/${type}/data/${id}/csv`);
+                const response = await fetch(`/v1/${type}/data/${id}/csv`);
                 if (!response.ok) {
                     throw new Error('下载失败');
                 }
@@ -1051,74 +1099,51 @@
         // 页面加载时获取已爬取内容
         window.onload = loadCrawledItems;
 
-        async function crawlItem(id, type) {
-            showStatus('<div class="loading-spinner"></div>正在爬取数据，请稍候...', 'crawling');
-            
+        async function crawlItem(type, id) {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) {
-                    showStatus('请先登录后再进行爬取', 'error');
+                    alert('请先登录');
+                    window.location.href = '/login';
                     return;
                 }
-
-                const endpoint = type === '1' ? '/v1/book/crawl' : '/v1/movie/crawl';
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 120000); // 2分钟超时
-
-                const response = await fetch(endpoint, {
+                
+                // 先检查是否已爬取
+                const typeStr = type === '1' ? 'book' : 'movie';
+                const checkResponse = await fetch(`/v1/crawled/check/${typeStr}/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (checkResponse.ok) {
+                    const checkData = await checkResponse.json();
+                    if (checkData.exists) {
+                        alert('爬取失败：该数据已爬取');
+                        return;
+                    }
+                }
+                
+                // 开始爬取
+                const response = await fetch(`/v1/${typeStr}/crawl`, {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ id: id }),
-                    signal: controller.signal
+                    body: JSON.stringify({ id: id })
                 });
                 
-                clearTimeout(timeoutId);
-
-                if (response.status === 401) {
-                    showStatus('登录已过期，请重新登录', 'error');
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 1500);
-                    return;
-                }
-
-                if (response.status === 503) {
-                    showStatus('爬取失败：请求超时，请稍后重试', 'error');
-                    return;
-                }
-                
                 if (response.ok) {
-                    const data = await response.json();
-                    showStatus('爬取完成！正在跳转...', 'success');
-                    setTimeout(() => {
-                        window.location.href = `/v1/${type === '1' ? 'book' : 'movie'}/data/${data[type === '1' ? 'book_id' : 'movie_id']}`;
-                    }, 1000);
+                    alert('爬取成功，正在跳转到详情页面...');
+                    window.location.href = `/v1/${typeStr}/data/${id}?token=${token}`;
                 } else {
-                    try {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || '未知错误');
-                    } catch (e) {
-                        // 如果无法解析JSON，使用状态码对应的错误信息
-                        const statusMessages = {
-                            400: '请求参数错误',
-                            401: '未授权访问',
-                            403: '禁止访问',
-                            404: '资源不存在',
-                            500: '服务器内部错误',
-                            503: '请求超时'
-                        };
-                        throw new Error(statusMessages[response.status] || `服务器错误(${response.status})`);
-                    }
+                    const data = await response.json();
+                    alert(data.error || '爬取失败');
                 }
             } catch (error) {
-                if (error.name === 'AbortError') {
-                    showStatus('爬取失败：请求超时，请稍后重试', 'error');
-                } else {
-                    showStatus('爬取失败：' + error.message, 'error');
-                }
+                console.error('爬取失败:', error);
+                alert('爬取失败，请稍后重试');
             }
         }
 
@@ -1140,7 +1165,7 @@
             
             try {
                 const endpoint = type === '1' ? '/v1/book/search' : '/v1/movie/search';
-                const response = await fetch(`http://106.52.139.242:8000${endpoint}`, {
+                const response = await fetch(`http://localhost:8000${endpoint}`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -1195,7 +1220,7 @@
                             </div>
                             <div class="button-group">
                                 <a href="https://${type === '1' ? 'book' : 'movie'}.douban.com/subject/${item.id}/" target="_blank" class="btn-detail">查看详情</a>
-                                <button class="btn-crawl" onclick="crawlItem('${item.id}', '${type}')">开始爬取</button>
+                                <button class="btn-crawl" onclick="crawlItem('${type}', '${item.id}')">开始爬取</button>
                             </div>
                         `;
                         resultsDiv.appendChild(itemDiv);
@@ -1213,7 +1238,7 @@
                 searchHeader.classList.add('expanded');
             } catch (error) {
                 console.error('搜索失败:', error);
-                showStatus('搜索失败：' + error.message, 'error');
+                showStatus('搜索失败: ' + error.message, 'error');
             }
         }
 
@@ -1221,6 +1246,9 @@
         function checkLoginStatus() {
             const token = localStorage.getItem('token');
             const username = localStorage.getItem('username');
+            console.log('Checking login status - Token:', token); // 调试日志
+            console.log('Checking login status - Username:', username); // 调试日志
+            
             const authButtons = document.getElementById('authButtons');
             const userInfo = document.getElementById('userInfo');
             const usernameSpan = document.getElementById('username');
@@ -1229,9 +1257,14 @@
                 authButtons.style.display = 'none';
                 userInfo.style.display = 'flex';
                 usernameSpan.textContent = username;
+                // 加载已爬取内容
+                loadCrawledItems();
             } else {
                 authButtons.style.display = 'flex';
                 userInfo.style.display = 'none';
+                // 清除可能存在的无效token
+                localStorage.removeItem('token');
+                localStorage.removeItem('username');
             }
         }
 
@@ -1245,6 +1278,57 @@
 
         // 页面加载时检查登录状态
         document.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+        // 添加viewDetail函数
+        function viewDetail(type, id) {
+            console.log('Viewing details for:', type, id); // 调试日志
+            const token = localStorage.getItem('token');
+            console.log('Token from localStorage:', token); // 调试日志
+            
+            if (!token) {
+                alert('请先登录');
+                window.location.href = '/login';
+                return;
+            }
+            
+            // 构建URL，确保token正确传递
+            const url = `/v1/${type}/data/${id}?token=${token}`;
+            console.log('Redirecting to:', url); // 调试日志
+            window.location.href = url;
+        }
+
+        async function deleteItem(type, id) {
+            if (!confirm('确定要删除这条记录吗？')) {
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('请先登录');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                const response = await fetch(`/v1/crawled/items/${type}/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('删除成功');
+                    loadCrawledItems(); // 重新加载已爬取列表
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '删除失败');
+                }
+            } catch (error) {
+                console.error('删除失败:', error);
+                alert('删除失败，请稍后重试');
+            }
+        }
     </script>
 </body>
 

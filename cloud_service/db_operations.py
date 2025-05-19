@@ -319,10 +319,16 @@ class DatabaseOperations:
             return False
 
     def execute_query(self, sql, params=None):
-        with self.connection.cursor() as cursor:
-            cursor.execute(sql, params or ())
-            try:
-                result = cursor.fetchall()
-                return result
-            except:
-                return None
+        """执行SQL查询"""
+        try:
+            with self.connection.cursor() as cursor:
+                cursor.execute(sql, params or ())
+                if sql.strip().upper().startswith('SELECT'):
+                    return cursor.fetchall()
+                else:
+                    self.connection.commit()
+                    return cursor.rowcount
+        except Exception as e:
+            print(f"执行SQL查询时出错: {e}")
+            self.connection.rollback()
+            return None

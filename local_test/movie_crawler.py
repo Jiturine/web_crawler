@@ -5,7 +5,7 @@ import time
 import re
 from headers import headers
 from emotion_classification import classify_text, classify
-from sanic import Sanic, request
+from sanic import Sanic
 from sanic.response import json as json_response
 from sanic.exceptions import Unauthorized
 import pymysql
@@ -16,13 +16,13 @@ import os
 from datetime import datetime
 from auth import verify_token
 
-app = Sanic("BookCrawler")
+app = Sanic("MovieCrawler")
 
 def get_db_connection():
     return pymysql.connect(**DB_CONFIG)
 
-@app.route("/v1/book/search", methods=["POST"])
-async def search_books(request):
+@app.route("/v1/movie/search", methods=["POST"])
+async def search_movies(request):
     data = request.json
     search_text = data.get('search_text')
     
@@ -32,7 +32,7 @@ async def search_books(request):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://book.douban.com/j/subject_suggest?q={search_text}",
+                f"https://movie.douban.com/j/subject_suggest?q={search_text}",
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
             )
             results = response.json()
@@ -45,17 +45,17 @@ async def search_books(request):
                         'id': item['id'],
                         'name': item['title'],
                         'image': item.get('img', ''),
-                        'author': item.get('author', ['未知'])[0] if 'author' in item else '未知',
-                        'publisher': item.get('publisher', '未知'),
-                        'publish_date': item.get('year', '未知')
+                        'director': item.get('directors', ['未知'])[0] if 'directors' in item else '未知',
+                        'type': item.get('type', '未知'),
+                        'release_date': item.get('year', '未知')
                     })
             
             return json_response({"results": processed_results})
     except Exception as e:
         return json_response({"error": str(e)}, status=500)
 
-@app.route("/v1/book/crawl", methods=["POST"])
-async def crawl_book(request):
+@app.route("/v1/movie/crawl", methods=["POST"])
+async def crawl_movie(request):
     # 验证用户身份
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -67,69 +67,69 @@ async def crawl_book(request):
         raise Unauthorized('无效的token')
 
     data = request.json
-    book_id = data.get('id')
+    movie_id = data.get('id')
     
-    if not book_id:
-        return json_response({"error": "图书ID不能为空"}, status=400)
+    if not movie_id:
+        return json_response({"error": "电影ID不能为空"}, status=400)
     
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://book.douban.com/subject/{book_id}/",
+                f"https://movie.douban.com/subject/{movie_id}/",
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
             )
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # 获取图书信息
+            # 获取电影信息
             title = soup.find('h1').find('span').text.strip()
             rating = soup.find('strong', class_='ll rating_num').text.strip()
             info = soup.find('div', id='info').text.strip()
             
-            # 解析作者、出版社、出版日期等信息
-            author = '未知'
-            publisher = '未知'
-            publish_date = '未知'
+            # 解析导演、类型、上映日期等信息
+            director = '未知'
+            movie_type = '未知'
+            release_date = '未知'
             
             for line in info.split('\n'):
-                if '作者' in line:
-                    author = line.split(':')[1].strip()
-                elif '出版社' in line:
-                    publisher = line.split(':')[1].strip()
-                elif '出版日期' in line:
-                    publish_date = line.split(':')[1].strip()
+                if '导演' in line:
+                    director = line.split(':')[1].strip()
+                elif '类型' in line:
+                    movie_type = line.split(':')[1].strip()
+                elif '上映日期' in line:
+                    release_date = line.split(':')[1].strip()
             
             # 保存到数据库
             conn = get_db_connection()
             try:
                 with conn.cursor() as cursor:
-                    # 检查图书是否已存在
-                    sql = "SELECT id FROM books WHERE id = %s"
-                    cursor.execute(sql, (book_id,))
+                    # 检查电影是否已存在
+                    sql = "SELECT id FROM movies WHERE id = %s"
+                    cursor.execute(sql, (movie_id,))
                     if not cursor.fetchone():
-                        # 插入图书数据
+                        # 插入电影数据
                         sql = """
-                            INSERT INTO books (id, name, author, publisher, publish_date, rating, info)
+                            INSERT INTO movies (id, name, director, type, release_date, rating, info)
                             VALUES (%s, %s, %s, %s, %s, %s, %s)
                         """
-                        cursor.execute(sql, (book_id, title, author, publisher, publish_date, rating, info))
+                        cursor.execute(sql, (movie_id, title, director, movie_type, release_date, rating, info))
                     
                     # 关联用户数据
                     sql = """
                         INSERT INTO user_data (user_id, data_id, data_type)
-                        VALUES (%s, %s, 'book')
+                        VALUES (%s, %s, 'movie')
                         ON DUPLICATE KEY UPDATE created_at = CURRENT_TIMESTAMP
                     """
-                    cursor.execute(sql, (user_id, book_id))
+                    cursor.execute(sql, (user_id, movie_id))
                 conn.commit()
             finally:
                 conn.close()
             
-            return json_response({"book_id": book_id})
+            return json_response({"movie_id": movie_id})
     except Exception as e:
         return json_response({"error": str(e)}, status=500)
 
-@app.route("/v1/book/data/<book_id>", methods=["GET"])
-async def get_book_data(request, book_id):
+@app.route("/v1/movie/data/<movie_id>", methods=["GET"])
+async def get_movie_data(request, movie_id):
     # 验证用户身份
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -145,22 +145,22 @@ async def get_book_data(request, book_id):
         with conn.cursor() as cursor:
             # 检查用户是否有权限访问该数据
             sql = """
-                SELECT b.* FROM books b
-                INNER JOIN user_data ud ON b.id = ud.data_id AND ud.data_type = 'book'
-                WHERE b.id = %s AND ud.user_id = %s
+                SELECT m.* FROM movies m
+                INNER JOIN user_data ud ON m.id = ud.data_id AND ud.data_type = 'movie'
+                WHERE m.id = %s AND ud.user_id = %s
             """
-            cursor.execute(sql, (book_id, user_id))
-            book = cursor.fetchone()
+            cursor.execute(sql, (movie_id, user_id))
+            movie = cursor.fetchone()
             
-            if not book:
-                return json_response({"error": "未找到图书数据或无权访问"}, status=404)
+            if not movie:
+                return json_response({"error": "未找到电影数据或无权访问"}, status=404)
             
-            return json_response(book)
+            return json_response(movie)
     finally:
         conn.close()
 
-@app.route("/v1/book/csv/<book_id>", methods=["GET"])
-async def get_book_csv(request, book_id):
+@app.route("/v1/movie/csv/<movie_id>", methods=["GET"])
+async def get_movie_csv(request, movie_id):
     # 验证用户身份
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith('Bearer '):
@@ -176,22 +176,22 @@ async def get_book_csv(request, book_id):
         with conn.cursor() as cursor:
             # 检查用户是否有权限访问该数据
             sql = """
-                SELECT b.* FROM books b
-                INNER JOIN user_data ud ON b.id = ud.data_id AND ud.data_type = 'book'
-                WHERE b.id = %s AND ud.user_id = %s
+                SELECT m.* FROM movies m
+                INNER JOIN user_data ud ON m.id = ud.data_id AND ud.data_type = 'movie'
+                WHERE m.id = %s AND ud.user_id = %s
             """
-            cursor.execute(sql, (book_id, user_id))
-            book = cursor.fetchone()
+            cursor.execute(sql, (movie_id, user_id))
+            movie = cursor.fetchone()
             
-            if not book:
-                return json_response({"error": "未找到图书数据或无权访问"}, status=404)
+            if not movie:
+                return json_response({"error": "未找到电影数据或无权访问"}, status=404)
             
             # 创建CSV文件
-            csv_filename = f"book_{book_id}.csv"
+            csv_filename = f"movie_{movie_id}.csv"
             with open(csv_filename, 'w', newline='', encoding='utf-8') as csvfile:
                 writer = csv.writer(csvfile)
                 writer.writerow(['字段', '值'])
-                for key, value in book.items():
+                for key, value in movie.items():
                     writer.writerow([key, value])
             
             # 读取CSV文件内容
@@ -205,129 +205,139 @@ async def get_book_csv(request, book_id):
     finally:
         conn.close()
 
-def book_searcher(search_text):
-    '''根据关键词搜索图书并返回url列表'''
-    url = f"https://search.douban.com/book/subject_search?search_text={search_text}&cat=1002"
+def movie_searcher(search_text):
+    '''根据关键词搜索电影并返回url列表'''
+    url = f"https://search.douban.com/movie/subject_search?search_text={search_text}&cat=1002"
     resp = requests.get(url, headers=headers)
     bs = BeautifulSoup(resp.text, "html.parser")
     ori = bs.find('script', {"type": "text/javascript"}).get_text(strip=True)
-    rein = re.compile(r'"url": "https://book.douban.com/subject/(\d+)/"')
+    rein = re.compile(r'"url": "https://movie.douban.com/subject/(\d+)/"')
     lst = rein.findall(ori)
     return lst
 
-def generate_book_url(id):
-    '''根据id生成图书的url'''
-    return f"https://book.douban.com/subject/{id}/"
+def generate_movie_url(id):
+    '''根据id生成电影的url'''
+    return f"https://movie.douban.com/subject/{id}/"
 
-def get_book_data(id):
-    '''获取图书数据并返回（包括图书信息和评论信息）'''
-    data = get_book_info(id)
-    data["comment_list"] = get_book_comments(id, 100)
+def get_movie_data(id):
+    '''获取电影数据（包括电影信息和评论信息）'''
+    data = get_movie_info(id)
+    data["comment_list"] = get_movie_comments(id, 100)
     return data
 
-def get_book_info(id):
-    '''获取图书的基本信息'''
+def get_movie_info(id):
+    '''获取电影的基本信息'''
     try:
-        base_url = generate_book_url(id)
+        base_url = generate_movie_url(id)
         resp = requests.get(base_url, headers=headers)
         bs = BeautifulSoup(resp.text, 'html.parser')
         
         # 获取基本信息
         try:
-            book_info_json_str = bs.find("script", {"type": "application/ld+json"}).get_text()
-            book_info_json = json.loads(book_info_json_str)
-            book_url = book_info_json["url"]
-            book_id = book_url.split("/")[-2]
-            book_name = book_info_json["name"]
+            movie_info_json_str = bs.find("script", {"type": "application/ld+json"}).get_text()
+            movie_info_json = json.loads(movie_info_json_str)
+            movie_url = movie_info_json["url"]
+            movie_id = movie_url.split("/")[-2]
+            movie_name = movie_info_json["name"]
         except (AttributeError, KeyError, json.JSONDecodeError):
-            book_id = id
-            book_name = "未知书名"
+            movie_id = id
+            movie_name = "未知电影"
         
-        # 获取详细信息
-        book_infos = bs.find("div", {"id" : "info"})
+        movie_infos = bs.find("div", {"id": "info"})
         
-        # 解析
+        # 导演
         try:
-            author_span = book_infos.find('span', {"class": "pl"}, string=' 作者')
-            book_author = author_span.parent.get_text(strip=True).replace('作者:', '').strip()
+            movie_director = movie_infos.find('span', {"class": "pl"}, string='导演').parent.get_text(strip=True).replace('导演:', '').strip()
         except (AttributeError, TypeError):
-            book_author = "未知作者"
+            movie_director = "未知导演"
             
-        # 解析出版社
+        # 编剧
         try:
-            book_publisher = book_infos.find('span', {"class": "pl"}, string='出版社:').find_next_sibling('a').get_text().strip()
+            movie_scriptwriter = movie_infos.find('span', {"class": "pl"}, string='编剧').parent.get_text(strip=True).replace('编剧:', '').strip()
         except (AttributeError, TypeError):
-            book_publisher = "未知出版社"
+            movie_scriptwriter = "未知编剧"
             
-        # 解析价格
+        # 主演
         try:
-            book_price = book_infos.find('span', {"class": "pl"}, string='价格:').next_sibling.get_text().strip()
+            movie_star = movie_infos.find('span', {"class": "pl"}, string='主演').parent.get_text(strip=True).replace('主演:', '').strip()
         except (AttributeError, TypeError):
-            book_price = "未知价格"
+            movie_star = "未知主演"
             
-        # 解析出版日期
+        # 类型
         try:
-            book_date = book_infos.find('span', {"class": "pl"}, string='出版日期:').next_sibling.get_text().strip()
+            movie_types = movie_infos.find_all('span', {"property": "v:genre"})
+            movie_type = ""
+            for type in movie_types:
+                movie_type += type.get_text().strip() + "/"
+            movie_type = movie_type[:-1] if movie_type else "未知类型"
         except (AttributeError, TypeError):
-            book_date = "未知出版日期"
+            movie_type = "未知类型"
             
-        # 解析ISBN
+        # 上映日期
         try:
-            book_isbn = book_infos.find('span', {"class": "pl"}, string='ISBN:').next_sibling.get_text().strip()
+            movie_date = movie_infos.find('span', {"property": "v:initialReleaseDate"}).get_text().strip()
         except (AttributeError, TypeError):
-            book_isbn = "未知ISBN"
+            movie_date = "未知上映日期"
             
-        # 解析评分
+        # IMDb
         try:
-            book_rating = bs.find("div", {"id": "interest_sectl"}).find("strong").get_text().strip()
+            movie_IMDb = movie_infos.find('span', {"class": "pl"}, string='IMDb:').next_sibling.get_text().strip()
         except (AttributeError, TypeError):
-            book_rating = "未知评分"
-        
-        # 获取图书图片URL
+            movie_IMDb = "未知IMDb"
+            
+        # 评分
+        try:
+            movie_rating = bs.find("div", {"id": "interest_sectl"}).find("strong").get_text().strip()
+        except (AttributeError, TypeError):
+            movie_rating = "未知评分"
+
+        # 获取电影图片URL
         try:
             img = bs.find("div", {"id": "mainpic"}).find("a").find("img")
             if img and img.get('src'):
-                book_image = img['src']
+                movie_image = img['src']
             else:
-                book_image = "/book_image/no_book_image.png"
+                movie_image = "/movie_image/no_movie_image.png"
         except (AttributeError, KeyError):
-            book_image = "/book_image/no_book_image.png"
+            movie_image = "/movie_image/no_movie_image.png"
         
-        book_info = {
-            "book_id": book_id,
-            "book_name": book_name,
-            "book_author": book_author,
-            "book_isbn": book_isbn,
-            "book_publisher": book_publisher,
-            "book_price": book_price,
-            "book_date": book_date,
-            "book_rating": book_rating,
-            "book_image": book_image
+        movie_info = {
+            "movie_id": movie_id,
+            "movie_name": movie_name,
+            "movie_director": movie_director,
+            "movie_scriptwriter": movie_scriptwriter,
+            "movie_star": movie_star,
+            "movie_type": movie_type,
+            "movie_date": movie_date,
+            "movie_rating": movie_rating,
+            "movie_IMDb": movie_IMDb,
+            "movie_image": movie_image
         }
-        return book_info
+        return movie_info
     except Exception as e:
-        print(f"获取图书信息时出错: {e}")
-        # 返回一个默认的图书信息
+        print(f"获取电影信息时出错: {e}")
+        # 返回一个默认值的默认电影信息
         return {
-            "book_id": id,
-            "book_name": "未知书名",
-            "book_author": "未知作者",
-            "book_isbn": "未知ISBN",
-            "book_publisher": "未知出版社",
-            "book_price": "未知价格",
-            "book_date": "未知出版日期",
-            "book_rating": "未知评分",
-            "book_image": "/book_image/no_book_image.png"
+            "movie_id": id,
+            "movie_name": "未知电影",
+            "movie_director": "未知导演",
+            "movie_scriptwriter": "未知编剧",
+            "movie_star": "未知主演",
+            "movie_type": "未知类型",
+            "movie_date": "未知上映日期",
+            "movie_rating": "未知评分",
+            "movie_IMDb": "未知IMDb",
+            "movie_image": "/movie_image/no_movie_image.png"
         }
 
-def get_book_comments(id, count):
-    '''获取图书的评论信息'''
+def get_movie_comments(id, count):
+    '''获取电影评论信息'''
     try:
         urls = []
         i = 0
-        base_url = generate_book_url(id)
+        base_url = generate_movie_url(id)
         while (i < count):
-            urls.append(base_url + "comments/" + "?start={0}&limit=20&status=P&sort=hotest".format(i))
+            urls.append(base_url + "comments?start={0}&limit=20&status=P&sort=new_score".format(i))
             i += 20
         comments = []
         comment_count = 0
@@ -336,7 +346,7 @@ def get_book_comments(id, count):
             try:
                 resp = requests.get(url, headers=headers)
                 bs = BeautifulSoup(resp.text, 'html.parser')
-                comment_items = bs.find_all("li", {"class": "comment-item"})
+                comment_items = bs.find_all("div", {"class": "comment-item"})
                 for comment_item in comment_items:
                     try:
                         comment_id = comment_item["data-cid"]
@@ -351,24 +361,24 @@ def get_book_comments(id, count):
                         
                     try:
                         comment = comment_item.find("div", {"class": "comment"})
-                        comment_isuseful = int(comment.find("span", {"class": "vote-count"}).get_text())
+                        comment_isuseful = int(comment.find("span", {"class": "votes"}).get_text())
                     except (AttributeError, ValueError):
                         comment_isuseful = 0
                         
                     try:
-                        comment_time_str = comment.find("a", {"class": "comment-time"}).get_text()
+                        comment_time_str = comment.find("span", {"class": "comment-time"}).get_text()
                         comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
                         comment_timestamp = int(time.mktime(comment_time))
                     except (AttributeError, ValueError):
                         comment_timestamp = int(time.time())
                         
                     try:
-                        comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
+                        comment_content = comment.find("span", {"class": "short"}).get_text().strip()
                     except AttributeError:
                         comment_content = "获取评论内容失败"
                         
                     try:
-                        match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
+                        match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "rating"})))
                         comment_rating = int((match.group(1))) // 10 if match else 0
                     except (AttributeError, ValueError):
                         comment_rating = 0
@@ -382,7 +392,7 @@ def get_book_comments(id, count):
                             "comment_rating": comment_rating,
                             "comment_content": comment_content,
                             "comment_isuseful": comment_isuseful,
-                            "comment_ispositive": 1
+                            "comment_ispositive": 1  # 默认设置为1
                         })
                         comment_count += 1
                         if comment_count >= count:
@@ -390,18 +400,23 @@ def get_book_comments(id, count):
                     except Exception as e:
                         print(f"获取评论页面时出错: {e}")
                         continue
-                classify_results = classify(comment_texts)
-                for result in classify_results:
-                    for comment in comments:
-                        if result['comment_id'] == comment['comment_id']:
-                            comment['comment_ispositive'] = result['is_positive']
+                
+                if comment_count >= count:
+                    break
+                    
+                # # 情感分析
+                # classify_results = classify(comment_texts)
+                # for result in classify_results:
+                #     for comment in comments:
+                #         if result['comment_id'] == comment['comment_id']:
+                #             comment['comment_ispositive'] = result['is_positive']
             except Exception as e:
                 print(f"获取评论页面时出错: {e}")
                 continue
                 
         return comments
     except Exception as e:
-        print(f"获取评论列表时出错: {e}")
+        print(f"获取评论页面时出错: {e}")
         return []
 
 if __name__ == "__main__":

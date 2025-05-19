@@ -2,33 +2,31 @@
 # -*- coding: utf-8 -*-
 from auth import generate_token, verify_token
 from sanic import Sanic, html, response
-from sanic.response import text, json as json_response
-from sanic.exceptions import Unauthorized
+from sanic.response import json as json_response
 import time
 import json as json_lib
-from json.decoder import JSONDecodeError
 from jinja2 import Environment, FileSystemLoader
 import plot
 import os
 import requests
 from db_operations import DatabaseOperations
-from datetime import datetime, timedelta
 import book_crawler, movie_crawler
 import requests
 import httpx
 from urllib.parse import urlparse
-import hashlib
 from werkzeug.security import generate_password_hash, check_password_hash
-import aiohttp
-import asyncio
 
 app = Sanic("mySanic")
-app.static("/static", "./static", name="static_files")
-app.static("/book_image", "./book_image", name="book_images")
-app.static("/movie_image", "./movie_image", name="movie_image")
+app.static("/static", os.path.abspath(__file__)+"/static", name="static_files")
+app.static("/book_image", os.path.abspath(__file__) +
+           "./book_image", name="book_images")
+app.static("/movie_image", os.path.abspath(__file__) +
+           "./movie_image", name="movie_image")
+template_dir = os.path.join(os.path.dirname(
+    os.path.abspath(__file__)), 'templates')
 
 env = Environment(
-    loader=FileSystemLoader("templates", encoding='utf-8'),
+    loader=FileSystemLoader(template_dir, encoding='utf-8'),
     auto_reload=True
 )
 db = DatabaseOperations()
@@ -124,7 +122,7 @@ async def search_book(request):
                     "publish_date": book_info["book_date"]
                 })
             except Exception as e:
-                print(f"获取书籍 {book_id} 信息时出�?: {str(e)}")
+                print(f"获取书籍 {book_id} 信息时出错: {str(e)}")
                 continue
                 
         return response.json({
@@ -132,7 +130,7 @@ async def search_book(request):
             "results": search_results
         })
     except Exception as e:
-        print(f"搜索书籍时出�?: {str(e)}")
+        print(f"搜索书籍时出错: {str(e)}")
         return response.json({"error": str(e)}, status=500)
 
 @app.route("/v1/movie/search", methods=["POST"])
@@ -142,7 +140,7 @@ async def search_movie(request):
         search_text = data["search_text"]
         movie_ids = movie_crawler.movie_searcher(search_text)
         
-        # 获取每部电影的详细信�?
+        # 获取每部电影的详细信息
         search_results = []
         for movie_id in movie_ids:
             try:
@@ -164,7 +162,7 @@ async def search_movie(request):
                     "type": movie_info["movie_type"]
                 })
             except Exception as e:
-                print(f"获取电影 {movie_id} 信息时出�?: {e}")
+                print(f"获取电影 {movie_id} 信息时出错: {e}")
                 continue
                 
         return response.json({
@@ -172,13 +170,13 @@ async def search_movie(request):
             "results": search_results
         })
     except Exception as e:
-        print(f"搜索电影时出�?: {e}")
+        print(f"搜索电影时出错: {e}")
         return response.json({"error": str(e)}, status=500)
 
 @app.route("/v1/book/crawl", methods=["POST"])
 async def crawl_book(request):
     try:
-        # 从请求头获取token并验证用�?
+        # 从请求头获取token并验证用户
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -187,23 +185,23 @@ async def crawl_book(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
             
-        # 获取用户�?
+        # 获取用户名
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
-            return response.json({"error": "用户不存�?"}, status=404)
+            return response.json({"error": "用户不存在"}, status=404)
         username = result[0]['username']
             
         data = request.json
         book_id = data["id"]
         
-        print(f"正在获取ID�? {book_id} 的书本数据到用户 {username}...")
+        print(f"正在获取ID为 {book_id} 的书本数据到用户 {username}...")
         book_data = book_crawler.get_book_data(id=book_id)
         
         # 保存书本数据
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(
-                "http://106.52.139.242:8000/v1/book/crawled/upload",
+                "http://localhost:8000/v1/book/crawled/upload",
                 json=book_data, 
                 timeout=5.0
             )
@@ -215,7 +213,7 @@ async def crawl_book(request):
             VALUES (%s, %s, 'book', CURRENT_TIMESTAMP)
         """
         db.execute_query(sql, (user_id, book_id))
-        print(f"用户 {username} 成功爬取并保存了书籍 {book_id} 的数�?")
+        print(f"用户 {username} 成功爬取并保存了书籍 {book_id} 的数据")
             
         return response.json({
             "status": "success",
@@ -223,13 +221,13 @@ async def crawl_book(request):
             "upload_status": "completed"
         })
     except Exception as e:
-        print(f"爬取书籍时出�?: {str(e)}")
+        print(f"爬取书籍时出错: {str(e)}")
         return response.json({"error": str(e)}, status=500)
 
 @app.route("/v1/movie/crawl", methods=["POST"])
 async def crawl_movie(request):
     try:
-        # 从请求头获取token并验证用�?
+        # 从请求头获取token并验证用户
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -238,17 +236,17 @@ async def crawl_movie(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
             
-        # 获取用户�?
+        # 获取用户名
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
-            return response.json({"error": "用户不存�?"}, status=404)
+            return response.json({"error": "用户不存在"}, status=404)
         username = result[0]['username']
             
         data = request.json
         movie_id = data["id"]
         
-        print(f"正在获取ID�? {movie_id} 的电影数据到用户 {username}...")
+        print(f"正在获取ID为 {movie_id} 的电影数据到用户 {username}...")
         movie_data = movie_crawler.get_movie_data(id=movie_id)
         
         # 保存电影图片路径
@@ -261,7 +259,7 @@ async def crawl_movie(request):
         # 保存电影数据
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(
-                "http://106.52.139.242:8000/v1/movie/crawled/upload",
+                "http://localhost:8000/v1/movie/crawled/upload",
                 json=movie_data, 
                 timeout=5.0
             )
@@ -273,7 +271,7 @@ async def crawl_movie(request):
             VALUES (%s, %s, 'movie', CURRENT_TIMESTAMP)
         """
         db.execute_query(sql, (user_id, movie_id))
-        print(f"用户 {username} 成功爬取并保存了电影 {movie_id} 的数�?")
+        print(f"用户 {username} 成功爬取并保存了电影 {movie_id} 的数据")
             
         return response.json({
             "status": "success",
@@ -281,16 +279,16 @@ async def crawl_movie(request):
             "upload_status": "completed"
         })
     except Exception as e:
-        print(f"爬取电影时出�?: {str(e)}")
+        print(f"爬取电影时出错: {str(e)}")
         return response.json({"error": str(e)}, status=500)
 
 def download_book_image(image_url, book_id):
     try:
-        # 默认图片路径None，直接返回默认图�?
+        # 默认图片路径None，直接返回默认图片
         if image_url == "/book_image/no_book_image.png" or image_url is None or image_url == "None":
             return "/book_image/no_book_image.png"
             
-        # 如果用户图片URL为None，返回默认图�?
+        # 如果用户图片URL为None，返回默认图片
         if not image_url:
             return "/book_image/no_book_image.png"
             
@@ -298,7 +296,7 @@ def download_book_image(image_url, book_id):
         if not os.path.exists("book_image"):
             os.makedirs("book_image")
             
-        # 从URL提取文件扩展�?
+        # 从URL提取文件扩展名
         parsed_url = urlparse(image_url)
         file_ext = os.path.splitext(parsed_url.path)[1]
         if not file_ext:
@@ -307,7 +305,7 @@ def download_book_image(image_url, book_id):
         # 构建本地路径
         local_path = f"book_image/{book_id}{file_ext}"
         
-        # 如果文件存在，直接返回路�?
+        # 如果文件存在，直接返回路径
         if os.path.exists(local_path):
             return f"/book_image/{book_id}{file_ext}"
             
@@ -325,16 +323,16 @@ def download_book_image(image_url, book_id):
             
         return f"/book_image/{book_id}{file_ext}"
     except Exception as e:
-        print(f"下载图片时出�?: {e}")
+        print(f"下载图片时出错: {e}")
         return "/book_image/no_book_image.png"
 
 def download_movie_image(image_url, movie_id):
     try:
-        # 默认图片路径None，直接返回默认图�?
+        # 默认图片路径None，直接返回默认图片
         if image_url == "/movie_image/no_movie_image.png" or image_url is None or image_url == "None":
             return "/movie_image/no_movie_image.png"
             
-        # 如果用户图片URL为None，返回默认图�?
+        # 如果用户图片URL为None，返回默认图片
         if not image_url:
             return "/movie_image/no_movie_image.png"
             
@@ -342,7 +340,7 @@ def download_movie_image(image_url, movie_id):
         if not os.path.exists("movie_image"):
             os.makedirs("movie_image")
             
-        # 从URL提取文件扩展�?
+        # 从URL提取文件扩展名
         parsed_url = urlparse(image_url)
         file_ext = os.path.splitext(parsed_url.path)[1]
         if not file_ext:
@@ -351,7 +349,7 @@ def download_movie_image(image_url, movie_id):
         # 构建本地路径
         local_path = f"movie_image/{movie_id}{file_ext}"
         
-        # 如果文件存在，直接返回路�?
+        # 如果文件存在，直接返回路径
         if os.path.exists(local_path):
             return f"/movie_image/{movie_id}{file_ext}"
             
@@ -369,15 +367,15 @@ def download_movie_image(image_url, movie_id):
             
         return f"/movie_image/{movie_id}{file_ext}"
     except Exception as e:
-        print(f"下载图片时出�?: {e}")
+        print(f"下载图片时出错: {e}")
         return "/movie_image/no_movie_image.png"
 
 @app.route("/v1/book/crawled/upload", methods=["POST"])
 async def upload_book(request):
     if not request.json:
-        return response.json({"error": "未提�? JSON 数据"}, status=400)
+        return response.json({"error": "未提供 JSON 数据"}, status=400)
     
-    # 保存到文件系�?
+    # 保存到文件系统
     save_to_file(request.json, "book")
     
     # 保存到数据库
@@ -385,40 +383,89 @@ async def upload_book(request):
         plot.plot_book_comment_wordcloud(request.json)
         return response.json({"code": 1, "message": "上传成功"})
     else:
-        return response.json({"code": -1, "message": "数据库保存失�?"}, status=500)
+        return response.json({"code": -1, "message": "数据库保存失败"}, status=500)
 
 @app.route("/v1/book/data/<book_id>", methods=["GET"])
 async def get_book_data(request, book_id):
     try:
-        user_id = request.ctx.user_id  # 获取之前用户的ID
+        # 从请求头或URL参数中获取token
+        token = request.headers.get('Authorization')
         
-        # 检查用户是否有权限访问该数�?
-        sql = "SELECT 1 FROM user_data WHERE user_id = %s AND data_id = %s AND data_type = 'book'"
-        result = db.execute_query(sql, (user_id, book_id))
-        if not result:
-            return response.json({"error": "未找到该数据或用户权限不�?"}, status=404)
+        if not token or not token.startswith('Bearer '):
+            # 尝试从URL参数中获取token
+            token = request.args.get('token')
             
-        # 获取书籍数据
-        sql = "SELECT * FROM books WHERE id = %s"
-        result = db.execute_query(sql, (book_id,))
-        if not result:
-            return response.json({"error": "未找到该书籍"}, status=404)
+            if not token:
+                return response.json({"error": "未提供有效的token"}, status=401)
+            token = f"Bearer {token}"
+        
+        # 验证token
+        try:
+            user_id = verify_token(token.split(' ')[1])
+        except Exception as e:
+            return response.json({"error": "无效的token"}, status=401)
             
-        book_data = result[0]
-        # 获取书籍图片路径
-        book_image = book_data.get('book_image')
-        if book_image is None or book_image == "None":
+        if not user_id:
+            return response.json({"error": "无效的token"}, status=401)
+            
+        # 检查用户是否有权限访问该数据
+        sql = """
+            SELECT b.*, bc.* 
+            FROM books b
+            LEFT JOIN book_comments bc ON b.book_id = bc.book_id
+            INNER JOIN user_data ud ON b.book_id = ud.data_id AND ud.data_type = 'book'
+            WHERE b.book_id = %s AND ud.user_id = %s
+        """
+        result = db.execute_query(sql, (book_id, user_id))
+        
+        if not result:
+            return response.json({"error": "未找到该数据或用户权限不足"}, status=404)
+            
+        # 处理查询结果
+        book_data = {}
+        comments = []
+        
+        for row in result:
+            if not book_data:
+                # 只取第一行作为书籍基本信息
+                book_data = {
+                    'book_id': row['book_id'],
+                    'book_name': row['book_name'],
+                    'book_author': row['book_author'],
+                    'book_publisher': row['book_publisher'],
+                    'book_date': row['book_date'],
+                    'book_rating': row['book_rating'],
+                    'book_image': row['book_image']
+                }
+            
+            # 收集评论信息
+            if row.get('comment_id'):
+                comment = {
+                    'comment_id': row['comment_id'],
+                    'comment_username': row['comment_username'],
+                    'comment_timestamp': row['comment_timestamp'],
+                    'comment_rating': row['comment_rating'],
+                    'comment_content': row['comment_content'],
+                    'comment_isuseful': row['comment_isuseful'],
+                    'is_positive': row.get('is_positive', 0)
+                }
+                comments.append(comment)
+        
+        book_data['comment_list'] = comments
+        
+        # 处理图片路径
+        if not book_data['book_image'] or book_data['book_image'] == "None":
             book_data['book_image'] = "/book_image/no_book_image.png"
         else:
-            book_data['book_image'] = download_book_image(book_image, book_id)
+            book_data['book_image'] = download_book_image(book_data['book_image'], book_id)
             
         # 生成词云
         plot.plot_book_comment_wordcloud(book_data)
         wordcloud_path = f"static/book_comment_wordcloud_{book_id}.png"
         
         # 生成统计
-        total_comments = len(book_data['comment_list'])
-        positive_comments = len([c for c in book_data['comment_list'] if c.get('is_positive', 0) == 1])
+        total_comments = len(comments)
+        positive_comments = len([c for c in comments if c.get('is_positive', 0) == 1])
         negative_comments = total_comments - positive_comments
         
         # 渲染模板
@@ -450,8 +497,8 @@ async def get_book_csv(request, book_id):
         # 写入基本信息
         writer.writerow(['基本信息'])
         writer.writerow(['书名', book_data['book_name']])
-        writer.writerow(['作�?', book_data['book_author']])
-        writer.writerow(['出版�?', book_data['book_publisher']])
+        writer.writerow(['作者', book_data['book_author']])
+        writer.writerow(['出版社', book_data['book_publisher']])
         writer.writerow(['出版日期', book_data['book_publish_date']])
         writer.writerow(['评分', book_data['book_rating']])
         writer.writerow([])  # 空行
@@ -467,7 +514,7 @@ async def get_book_csv(request, book_id):
                 '正面' if comment.get('is_positive', 0) == 1 else '负面'
             ])
         
-        # 设置响应�?
+        # 设置响应头
         headers = {
             'Content-Type': 'text/csv; charset=utf-8-sig',
             'Content-Disposition': f'attachment; filename=book_{book_id}.csv'
@@ -480,9 +527,9 @@ async def get_book_csv(request, book_id):
 @app.route("/v1/movie/crawled/upload", methods=["POST"])
 async def upload_movie(request):
     if not request.json:
-        return response.json({"error": "未提�? JSON 数据"}, status=400)
+        return response.json({"error": "未提供 JSON 数据"}, status=400)
     
-    # 保存到文件系�?
+    # 保存到文件系统
     save_to_file(request.json, "movie")
 
     # 保存到数据库
@@ -490,7 +537,7 @@ async def upload_movie(request):
         plot.plot_movie_comment_wordcloud(request.json)
         return response.json({"code": 1, "message": "上传成功"})
     else:
-        return response.json({"code": -1, "message": "数据库保存失�?"}, status=500)
+        return response.json({"code": -1, "message": "数据库保存失败"}, status=500)
 
 @app.route("/v1/movie/data/<movie_id>", methods=["GET"])
 async def get_movie_data(request, movie_id):
@@ -526,9 +573,9 @@ async def get_movie_data(request, movie_id):
             
             return html(rendered)
         else:
-            return response.json({"error": "未找到电影数�?"}, status=404)
+            return response.json({"error": "未找到电影数据"}, status=404)
     except Exception as e:
-        print(f"获取电影数据时出�?: {str(e)}")
+        print(f"获取电影数据时出错: {str(e)}")
         return response.json({"error": "获取电影数据失败"}, status=500)
 
 @app.route("/v1/movie/data/<movie_id>/csv", methods=["GET"])
@@ -544,7 +591,7 @@ async def get_movie_csv(request, movie_id):
         
         # 写入基本信息
         writer.writerow(['基本信息'])
-        writer.writerow(['电影�?', movie_data['movie_name']])
+        writer.writerow(['电影名', movie_data['movie_name']])
         writer.writerow(['导演', movie_data['movie_director']])
         writer.writerow(['类型', movie_data['movie_type']])
         writer.writerow(['上映日期', movie_data['movie_date']])
@@ -562,7 +609,7 @@ async def get_movie_csv(request, movie_id):
                 '正面' if comment.get('is_positive', 0) == 1 else '负面'
             ])
         
-        # 设置响应�?
+        # 设置响应头
         headers = {
             'Content-Type': 'text/csv; charset=utf-8-sig',
             'Content-Disposition': f'attachment; filename=movie_{movie_id}.csv'
@@ -575,7 +622,7 @@ async def get_movie_csv(request, movie_id):
 @app.route("/v1/crawled/items", methods=["GET"])
 async def get_crawled_items(request):
     try:
-        # 从请求头获取token并验证用�?
+        # 从请求头获取token并验证用户
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -584,11 +631,11 @@ async def get_crawled_items(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
 
-        # 获取用户�?
+        # 获取用户名
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
-            return response.json({"error": "用户不存�?"}, status=404)
+            return response.json({"error": "用户不存在"}, status=404)
         username = result[0]['username']
             
         # 获取用户已爬取的书籍
@@ -613,15 +660,24 @@ async def get_crawled_items(request):
         """
         movies = db.execute_query(sql, (user_id,))
         
-        # 合并结果
+        # 合并结果并处理图片路径
         items = []
         if books:
-            items.extend(books)
+            for book in books:
+                if not book['image'] or book['image'] == "None":
+                    book['image'] = "/book_image/no_book_image.png"
+                else:
+                    book['image'] = download_book_image(book['image'], book['id'])
+                items.append(book)
+                
         if movies:
-            items.extend(movies)
+            for movie in movies:
+                if not movie['image'] or movie['image'] == "None":
+                    movie['image'] = "/movie_image/no_movie_image.png"
+                else:
+                    movie['image'] = download_movie_image(movie['image'], movie['id'])
+                items.append(movie)
             
-        print(f"用户 {username} 的已爬取信息有：{len(items)} �?")
-        
         return response.json({"items": items})
     except Exception as e:
         print(f"获取已爬取信息时出错: {str(e)}")
@@ -637,12 +693,12 @@ async def register(request):
         username = data["username"]
         password = data["password"]
         
-        # 检查用户名是否已存�?
+        # 检查用户名是否已存在
         existing_user = db.get_user_by_username(username)
         if existing_user:
             return json_response({"error": "用户名已存在"}, status=400)
         
-        # 创建新用�?
+        # 创建新用户
         hashed_password = generate_password_hash(password)
         if db.create_user(username, hashed_password):
             return json_response({"message": "注册成功"})
@@ -650,7 +706,7 @@ async def register(request):
             return json_response({"error": "注册失败"}, status=500)
             
     except Exception as e:
-        print(f"注册时出�?: {e}")
+        print(f"注册时出错: {e}")
         return json_response({"error": "注册失败"}, status=500)
 
 @app.route("/login", methods=["POST"])
@@ -660,7 +716,7 @@ async def login(request):
     password = data.get('password')
     
     if not all([username, password]):
-        return json_response({"error": "用户名和密码都不能为�?"}, status=400)
+        return json_response({"error": "用户名和密码都不能为空"}, status=400)
     
     try:
         # 获取用户信息
@@ -684,7 +740,7 @@ async def login(request):
         result = db.execute_query(sql, (user['id'],))
         crawled_count = result[0]['count'] if result else 0
         
-        print(f"用户 {username} 登录成功，已爬取信息有：{crawled_count} �?")
+        print(f"用户 {username} 登录成功，已爬取信息有：{crawled_count} 条")
         
         return json_response({
             "message": "登录成功",
@@ -695,7 +751,7 @@ async def login(request):
             }
         })
     except Exception as e:
-        print(f"登录时出�?: {e}")
+        print(f"登录时出错: {e}")
         return json_response({"error": "登录失败"}, status=500)
 
 @app.route("/user/info", methods=["GET"])
@@ -707,7 +763,7 @@ async def get_user_info(request):
         result = db.execute_query(sql, (user_id,))
         
         if not result:
-            return json_response({"error": "用户不存�?"}, status=404)
+            return json_response({"error": "用户不存在"}, status=404)
         
         return json_response(result[0])
     except Exception as e:
@@ -718,7 +774,7 @@ async def get_user_data(request):
     user_id = request.ctx.user_id
     
     try:
-        # 获取用户所有数�?
+        # 获取用户所有数据
         sql = """
             SELECT ud.data_id, ud.data_type, 
                    COALESCE(b.book_name, m.movie_name) as name,
@@ -752,9 +808,75 @@ async def get_user_data(request):
     except Exception as e:
         return json_response({"error": str(e)}, status=500)
 
+@app.route("/v1/crawled/items/<data_type>/<data_id>", methods=["DELETE"])
+async def delete_crawled_item(request, data_type, data_id):
+    try:
+        # 从请求头获取token并验证用户
+        token = request.headers.get('Authorization')
+        if not token or not token.startswith('Bearer '):
+            return response.json({"error": "未提供有效的token"}, status=401)
+        
+        user_id = verify_token(token.split(' ')[1])
+        if not user_id:
+            return response.json({"error": "无效的token"}, status=401)
+            
+        # 先删除评论数据
+        if data_type == 'book':
+            sql = "DELETE FROM book_comments WHERE book_id = %s"
+            db.execute_query(sql, (data_id,))
+            # 再删除书籍数据
+            sql = "DELETE FROM books WHERE book_id = %s"
+            db.execute_query(sql, (data_id,))
+        else:  # movie
+            sql = "DELETE FROM movie_comments WHERE movie_id = %s"
+            db.execute_query(sql, (data_id,))
+            # 再删除电影数据
+            sql = "DELETE FROM movies WHERE movie_id = %s"
+            db.execute_query(sql, (data_id,))
+            
+        # 最后删除用户数据关联
+        sql = """
+            DELETE FROM user_data 
+            WHERE user_id = %s AND data_id = %s AND data_type = %s
+        """
+        result = db.execute_query(sql, (user_id, data_id, data_type))
+        
+        # 检查是否成功删除
+        if result is None:
+            return response.json({"error": "删除失败"}, status=500)
+        
+        return response.json({"message": "删除成功"})
+    except Exception as e:
+        print(f"删除已爬取信息时出错: {str(e)}")
+        return response.json({"error": str(e)}, status=500)
+
+@app.route("/v1/crawled/check/<data_type>/<data_id>", methods=["GET"])
+async def check_crawled_item(request, data_type, data_id):
+    try:
+        # 从请求头获取token并验证用户
+        token = request.headers.get('Authorization')
+        if not token or not token.startswith('Bearer '):
+            return response.json({"error": "未提供有效的token"}, status=401)
+        
+        user_id = verify_token(token.split(' ')[1])
+        if not user_id:
+            return response.json({"error": "无效的token"}, status=401)
+            
+        # 检查是否已爬取
+        sql = """
+            SELECT 1 FROM user_data 
+            WHERE user_id = %s AND data_id = %s AND data_type = %s
+        """
+        result = db.execute_query(sql, (user_id, data_id, data_type))
+        
+        return response.json({"exists": bool(result)})
+    except Exception as e:
+        print(f"检查已爬取信息时出错: {str(e)}")
+        return response.json({"error": str(e)}, status=500)
+
 def init_db():
     try:
-        # 创建用户�?
+        # 创建用户表
         sql = """
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -766,7 +888,7 @@ def init_db():
         """
         db.execute_query(sql)
         
-        # 创建用户数据�?
+        # 创建用户数据表
         sql = """
             CREATE TABLE IF NOT EXISTS user_data (
                 user_id INT NOT NULL,
@@ -791,7 +913,7 @@ if __name__ == "__main__":
     # 初始化数据库
     init_db()
     
-    # 启动服务�?
+    # 启动服务
     app.run(
         host="0.0.0.0", 
         port=8000,
