@@ -489,7 +489,7 @@
             background: rgba(255, 255, 255, 0.5);
         }
         .toggle-icon::before {
-            content: '�?';
+            content: '▼';
             display: inline-block;
             transition: transform 0.3s ease;
         }
@@ -907,7 +907,7 @@
                     return;  // 如果未登录，直接返回
                 }
 
-                const response = await fetch('http://106.52.139.242:8000/v1/crawled/items', {
+                const response = await fetch('http://106.52.136.242:8000/v1/crawled/items', {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -943,8 +943,8 @@
                                 <div class="crawled-item-content">
                                     <div class="name" style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">${item.name}</div>
                                     <div class="info" style="color: #666;">
-                                        <div>作者：${item.author || '未知'}</div>
-                                        <div>出版社：${item.publisher || '未知'}</div>
+                                        <div>作者：${item.author ? item.author.split('/')[0] + '...' : '未知'}</div>
+                                        <div>出版社：${item.publisher ? item.publisher.split('/')[0] + '...' : '未知'}</div>
                                         <div>出版日期：${item.publish_date || '未知'}</div>
                                         <div class="rating" style="color: #e09015; font-weight: bold;">评分：${item.rating || '暂无'}</div>
                                     </div>
@@ -987,8 +987,8 @@
                                 <div class="crawled-item-content">
                                     <div class="name" style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">${item.name}</div>
                                     <div class="info" style="color: #666;">
-                                        <div>导演：${item.director || '未知'}</div>
-                                        <div>类型：${item.type || '未知'}</div>
+                                        <div>导演：${item.director ? item.director.split('/')[0] + '...' : '未知'}</div>
+                                        <div>类型：${item.type ? item.type.split('/')[0] + '...' : '未知'}</div>
                                         <div>上映日期：${item.release_date || '未知'}</div>
                                         <div class="rating" style="color: #e09015; font-weight: bold;">评分：${item.rating || '暂无'}</div>
                                     </div>
@@ -1124,8 +1124,8 @@
                     }
                 }
 
-                // 显示正在爬取的弹框
-                alert('正在爬取，请稍候...');
+                // 显示正在爬取的弹窗
+                alert('正在爬取，请稍等...');
                 
                 // 开始爬取
                 const response = await fetch(`/v1/${typeStr}/crawl`, {
@@ -1164,11 +1164,11 @@
                 return;
             }
 
-            showStatus('<div class="loading-spinner"></div>正在搜索，请稍候...', 'crawling');
+            showStatus('<div class="loading-spinner"></div>正在搜索，请稍等...', 'crawling');
             
             try {
                 const endpoint = type === '1' ? '/v1/book/search' : '/v1/movie/search';
-                const response = await fetch(`http://106.52.139.242:8000${endpoint}`, {
+                const response = await fetch(`http://106.52.136.242:8000${endpoint}`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',

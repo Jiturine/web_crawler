@@ -174,7 +174,7 @@ async def search_movie(request):
 @app.route("/v1/book/crawl", methods=["POST"])
 async def crawl_book(request):
     try:
-        # 从请求头获取token并验证用户
+        # 从请求头获取token并验证用
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -183,7 +183,7 @@ async def crawl_book(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
             
-        # 获取用户名
+        # 获取用户信息
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
@@ -199,7 +199,7 @@ async def crawl_book(request):
         # 保存书本数据
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(
-                "http://106.52.139.242:8000/v1/book/crawled/upload",
+                "http://106.52.136.242:8000/v1/book/crawled/upload",
                 json=book_data, 
                 timeout=5.0
             )
@@ -225,7 +225,7 @@ async def crawl_book(request):
 @app.route("/v1/movie/crawl", methods=["POST"])
 async def crawl_movie(request):
     try:
-        # 从请求头获取token并验证用户
+        # 从请求头获取token并验证用
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -234,7 +234,7 @@ async def crawl_movie(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
             
-        # 获取用户名
+        # 获取用户信息
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
@@ -257,7 +257,7 @@ async def crawl_movie(request):
         # 保存电影数据
         async with httpx.AsyncClient() as client:
             upload_response = await client.post(
-                "http://106.52.139.242:8000/v1/movie/crawled/upload",
+                "http://106.52.136.242:8000/v1/movie/crawled/upload",
                 json=movie_data, 
                 timeout=5.0
             )
@@ -497,7 +497,7 @@ async def get_book_csv(request, book_id):
         writer.writerow(['书名', book_data['book_name']])
         writer.writerow(['作者', book_data['book_author']])
         writer.writerow(['出版社', book_data['book_publisher']])
-        writer.writerow(['出版日期', book_data['book_publish_date']])
+        writer.writerow(['出版日期', book_data['book_date']])
         writer.writerow(['评分', book_data['book_rating']])
         writer.writerow([])  # 空行
         
@@ -620,7 +620,7 @@ async def get_movie_csv(request, movie_id):
 @app.route("/v1/crawled/items", methods=["GET"])
 async def get_crawled_items(request):
     try:
-        # 从请求头获取token并验证用户
+        # 从请求头获取token并验证用
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -629,7 +629,7 @@ async def get_crawled_items(request):
         if not user_id:
             return response.json({"error": "无效的token"}, status=401)
 
-        # 获取用户名
+        # 获取用户信息
         sql = "SELECT username FROM users WHERE id = %s"
         result = db.execute_query(sql, (user_id,))
         if not result:
@@ -809,7 +809,7 @@ async def get_user_data(request):
 @app.route("/v1/crawled/items/<data_type>/<data_id>", methods=["DELETE"])
 async def delete_crawled_item(request, data_type, data_id):
     try:
-        # 从请求头获取token并验证用户
+        # 从请求头获取token并验证用
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
@@ -851,7 +851,7 @@ async def delete_crawled_item(request, data_type, data_id):
 @app.route("/v1/crawled/check/<data_type>/<data_id>", methods=["GET"])
 async def check_crawled_item(request, data_type, data_id):
     try:
-        # 从请求头获取token并验证用户
+        # 从请求头获取token并验证用
         token = request.headers.get('Authorization')
         if not token or not token.startswith('Bearer '):
             return response.json({"error": "未提供有效的token"}, status=401)
