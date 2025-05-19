@@ -1045,7 +1045,7 @@
         // 下载JSON文件
         async function downloadJson(type, id) {
             try {
-                const response = await fetch(`/v1/${type}/data/${id}`);
+                const response = await fetch(`/v1/${type}/data/${id}/json`);
                 if (!response.ok) {
                     throw new Error('下载失败');
                 }
@@ -1124,8 +1124,8 @@
                     }
                 }
 
-                // 显示正在爬取的弹框
-                alert('正在爬取，请稍候...');
+                // 显示正在爬取的提示
+                alert('正在爬取，请稍等...');
                 
                 // 开始爬取
                 const response = await fetch(`/v1/${typeStr}/crawl`, {
@@ -1164,7 +1164,7 @@
                 return;
             }
 
-            showStatus('<div class="loading-spinner"></div>正在搜索，请稍候...', 'crawling');
+            showStatus('<div class="loading-spinner"></div>正在搜索，请稍等...', 'crawling');
             
             try {
                 const endpoint = type === '1' ? '/v1/book/search' : '/v1/movie/search';

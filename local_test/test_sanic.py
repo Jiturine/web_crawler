@@ -522,6 +522,39 @@ async def get_book_csv(request, book_id):
     else:
         return response.json({"code": -1, "message": "未找到该书籍"}, status=404)
 
+@app.route("/v1/book/data/<book_id>/json", methods=["GET"])
+async def get_book_json(request, book_id):
+    import datetime
+    import json
+    
+    def convert_datetime(obj):
+        if isinstance(obj, dict):
+            return {k: convert_datetime(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_datetime(i) for i in obj]
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            return obj
+            
+    book_data = db.get_book_data(book_id)
+    if book_data:
+        # 递归转换所有 datetime 字段
+        book_data = convert_datetime(book_data)
+        
+        # 格式化JSON数据
+        formatted_json = json.dumps(book_data, ensure_ascii=False, indent=4)
+        
+        # 设置响应头
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Disposition': f'attachment; filename=book_{book_id}.json'
+        }
+        
+        return response.raw(formatted_json.encode('utf-8'), headers=headers)
+    else:
+        return response.json({"code": -1, "message": "未找到该书籍"}, status=404)
+
 @app.route("/v1/movie/crawled/upload", methods=["POST"])
 async def upload_movie(request):
     if not request.json:
@@ -871,6 +904,39 @@ async def check_crawled_item(request, data_type, data_id):
     except Exception as e:
         print(f"检查已爬取信息时出错: {str(e)}")
         return response.json({"error": str(e)}, status=500)
+
+@app.route("/v1/movie/data/<movie_id>/json", methods=["GET"])
+async def get_movie_json(request, movie_id):
+    import datetime
+    import json
+    
+    def convert_datetime(obj):
+        if isinstance(obj, dict):
+            return {k: convert_datetime(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_datetime(i) for i in obj]
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        else:
+            return obj
+            
+    movie_data = db.get_movie_data(movie_id)
+    if movie_data:
+        # 递归转换所有 datetime 字段
+        movie_data = convert_datetime(movie_data)
+        
+        # 格式化JSON数据
+        formatted_json = json.dumps(movie_data, ensure_ascii=False, indent=4)
+        
+        # 设置响应头
+        headers = {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Disposition': f'attachment; filename=movie_{movie_id}.json'
+        }
+        
+        return response.raw(formatted_json.encode('utf-8'), headers=headers)
+    else:
+        return response.json({"code": -1, "message": "未找到该电影"}, status=404)
 
 def init_db():
     try:

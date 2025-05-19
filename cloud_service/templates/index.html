@@ -489,7 +489,7 @@
             background: rgba(255, 255, 255, 0.5);
         }
         .toggle-icon::before {
-            content: '▼';
+            content: '�?';
             display: inline-block;
             transition: transform 0.3s ease;
         }
@@ -802,7 +802,7 @@
     </div>
     <div class="user-info" id="userInfo" style="display: none;">
         <span id="username"></span>
-        <button class="btn btn-logout" onclick="logout()">退出登录</button>
+        <button class="btn btn-logout" onclick="logout()">退出登�?</button>
     </div>
     <div class="container">
         <div class="search-box">
@@ -820,7 +820,7 @@
             <button id="submit_search" class="btn btn-primary mt-4" onclick="WebCrawler()">搜索🔍</button>
             
             <div class="text-muted mt-2" style="font-size: 14px; text-align: center;">
-                提示：搜索后点击搜索结果中的项目即可开始爬取
+                提示：搜索后点击搜索结果中的项目即可开始爬�?
             </div>
 
             <div id="status_box" class="status-box">
@@ -844,7 +844,7 @@
 
         <div class="collapsible crawled-list-container">
             <div class="collapsible-header" onclick="toggleCollapsible('crawled-list')">
-                <h3>已爬取内容</h3>
+                <h3>已爬取内�?</h3>
                 <span class="toggle-icon"></span>
             </div>
             <div id="crawled-list" class="collapsible-content">
@@ -852,22 +852,22 @@
                     <!-- 书籍部分 -->
                     <div class="collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible('crawled-books')">
-                            <h4 style="color: #2980b9; margin: 0;">📚 已爬取书籍</h4>
+                            <h4 style="color: #2980b9; margin: 0;">📚 已爬取书�?</h4>
                             <span class="toggle-icon"></span>
                         </div>
                         <div id="crawled-books" class="collapsible-content expanded">
-                            <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取书籍</div>
+                            <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取书�?</div>
                         </div>
                     </div>
                     
                     <!-- 电影部分 -->
                     <div class="collapsible">
                         <div class="collapsible-header" onclick="toggleCollapsible('crawled-movies')">
-                            <h4 style="color: #27ae60; margin: 0;">🎬 已爬取电影</h4>
+                            <h4 style="color: #27ae60; margin: 0;">🎬 已爬取电�?</h4>
                             <span class="toggle-icon"></span>
                         </div>
                         <div id="crawled-movies" class="collapsible-content expanded">
-                            <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取电影</div>
+                            <div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取电�?</div>
                         </div>
                     </div>
                 </div>
@@ -882,7 +882,7 @@
     <script>
         var input_search_text = "";
         
-        // 显示状态信息
+        // 显示状态信�?
         function showStatus(message, type) {
             const statusBox = document.getElementById('status_box');
             const statusMessage = document.getElementById('status_message');
@@ -891,7 +891,7 @@
             statusMessage.innerHTML = message;
         }
 
-        // 切换可折叠内容
+        // 切换可折叠内�?
         function toggleCollapsible(id) {
             const content = document.getElementById(id);
             const header = content.previousElementSibling;
@@ -926,7 +926,7 @@
                     const booksContainer = document.getElementById('crawled-books');
                     const moviesContainer = document.getElementById('crawled-movies');
                     
-                    // 分类显示书籍和电影
+                    // 分类显示书籍和电�?
                     const books = data.items.filter(item => item.type === 'book' && item.id && item.name);
                     const movies = data.items.filter(item => item.type === 'movie' && item.id && item.name);
                     
@@ -943,10 +943,10 @@
                                 <div class="crawled-item-content">
                                     <div class="name" style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">${item.name}</div>
                                     <div class="info" style="color: #666;">
-                                        <div>作者：${item.author ? item.author.split('/')[0] + '...' : '未知'}</div>
-                                        <div>出版社：${item.publisher ? item.publisher.split('/')[0] + '...' : '未知'}</div>
-                                        <div>出版日期：${item.publish_date || '未知'}</div>
-                                        <div class="rating" style="color: #e09015; font-weight: bold;">评分：${item.rating || '暂无'}</div>
+                                        <div>作者：${item.author || '未知'}</div>
+                                        <div>出版社：${item.publisher || '未知'}</div>
+                                        <div>出版日期�?${item.publish_date || '未知'}</div>
+                                        <div class="rating" style="color: #e09015; font-weight: bold;">评分�?${item.rating || '暂无'}</div>
                                     </div>
                                 </div>
                                 <div class="crawled-item-buttons">
@@ -971,7 +971,7 @@
                             booksContainer.appendChild(div);
                         });
                     } else {
-                        booksContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取书籍</div>';
+                        booksContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取书�?</div>';
                     }
                     
                     // 显示电影
@@ -987,10 +987,10 @@
                                 <div class="crawled-item-content">
                                     <div class="name" style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">${item.name}</div>
                                     <div class="info" style="color: #666;">
-                                        <div>导演：${item.director ? item.director.split('/')[0] + '...' : '未知'}</div>
-                                        <div>类型：${item.type ? item.type.split('/')[0] + '...' : '未知'}</div>
-                                        <div>上映日期：${item.release_date || '未知'}</div>
-                                        <div class="rating" style="color: #e09015; font-weight: bold;">评分：${item.rating || '暂无'}</div>
+                                        <div>导演�?${item.director || '未知'}</div>
+                                        <div>类型�?${item.type || '未知'}</div>
+                                        <div>上映日期�?${item.release_date || '未知'}</div>
+                                        <div class="rating" style="color: #e09015; font-weight: bold;">评分�?${item.rating || '暂无'}</div>
                                     </div>
                                 </div>
                                 <div class="crawled-item-buttons">
@@ -1015,16 +1015,16 @@
                             moviesContainer.appendChild(div);
                         });
                     } else {
-                        moviesContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取电影</div>';
+                        moviesContainer.innerHTML = '<div style="text-align: center; color: #666; padding: 20px; font-size: 16px;">暂无已爬取电�?</div>';
                     }
 
-                    // 自动展开相应的容器
+                    // 自动展开相应的容�?
                     const crawledList = document.getElementById('crawled-list');
                     const crawledHeader = crawledList.previousElementSibling;
                     crawledList.classList.add('expanded');
                     crawledHeader.classList.add('expanded');
 
-                    // 自动展开书籍和电影部分
+                    // 自动展开书籍和电影部�?
                     const booksHeader = document.querySelector('#crawled-books').previousElementSibling;
                     const moviesHeader = document.querySelector('#crawled-movies').previousElementSibling;
                     document.querySelector('#crawled-books').classList.add('expanded');
@@ -1033,7 +1033,7 @@
                     moviesHeader.classList.add('expanded');
                 }
             } catch (error) {
-                console.error('加载已爬取内容失败:', error);
+                console.error('加载已爬取内容失�?:', error);
             }
         }
 
@@ -1045,7 +1045,7 @@
         // 下载JSON文件
         async function downloadJson(type, id) {
             try {
-                const response = await fetch(`/v1/${type}/data/${id}`);
+                const response = await fetch(`/v1/${type}/data/${id}/json`);
                 if (!response.ok) {
                     throw new Error('下载失败');
                 }
@@ -1062,7 +1062,7 @@
                 document.getElementById(`json-error-${id}`).style.display = 'none';
             } catch (error) {
                 console.error('下载失败:', error);
-                // 在按钮下方显示错误信息
+                // 在按钮下方显示错误信�?
                 const errorDiv = document.getElementById(`json-error-${id}`);
                 errorDiv.querySelector('.error-text').textContent = '下载失败，请稍后重试';
                 errorDiv.style.display = 'block';
@@ -1089,7 +1089,7 @@
                 document.getElementById(`csv-error-${id}`).style.display = 'none';
             } catch (error) {
                 console.error('下载失败:', error);
-                // 在按钮下方显示错误信息
+                // 在按钮下方显示错误信�?
                 const errorDiv = document.getElementById(`csv-error-${id}`);
                 errorDiv.querySelector('.error-text').textContent = '下载失败，请稍后重试';
                 errorDiv.style.display = 'block';
@@ -1119,15 +1119,15 @@
                 if (checkResponse.ok) {
                     const checkData = await checkResponse.json();
                     if (checkData.exists) {
-                        alert('爬取失败：该数据已爬取');
+                        alert('爬取失败：该数据已爬�?');
                         return;
                     }
                 }
 
-                // 显示正在爬取的弹窗
+                // 显示正在爬取的提�?
                 alert('正在爬取，请稍等...');
                 
-                // 开始爬取
+                // 开始爬�?
                 const response = await fetch(`/v1/${typeStr}/crawl`, {
                     method: 'POST',
                     headers: {
@@ -1195,22 +1195,22 @@
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'result-item';
                         
-                        // 根据类型（书籍/电影）显示不同的信息
+                        // 根据类型（书�?/电影）显示不同的信息
                         const infoHtml = type === '1' ? `
                             <div class="name">${item.name}</div>
                             <div class="info">
                                 <div class="author">作者：${item.author ? item.author.split('/')[0] + '...' : '未知'}</div>
                                 <div>出版社：${item.publisher ? item.publisher.split('/')[0] + '...' : '未知'}</div>
-                                <div>出版日期：${item.publish_date || '未知'}</div>
-                                <div class="rating">评分：${item.rating || '暂无'}</div>
+                                <div>出版日期�?${item.publish_date || '未知'}</div>
+                                <div class="rating">评分�?${item.rating || '暂无'}</div>
                             </div>
                         ` : `
                             <div class="name">${item.name}</div>
                             <div class="info">
-                                <div>导演：${item.director ? item.director.split('/')[0] + '...' : '未知'}</div>
-                                <div>类型：${item.type ? item.type.split('/')[0] + '...' : '未知'}</div>
-                                <div>上映日期：${item.release_date || '未知'}</div>
-                                <div class="rating">评分：${item.rating || '暂无'}</div>
+                                <div>导演�?${item.director ? item.director.split('/')[0] + '...' : '未知'}</div>
+                                <div>类型�?${item.type ? item.type.split('/')[0] + '...' : '未知'}</div>
+                                <div>上映日期�?${item.release_date || '未知'}</div>
+                                <div class="rating">评分�?${item.rating || '暂无'}</div>
                             </div>
                         `;
                         
@@ -1223,7 +1223,7 @@
                             </div>
                             <div class="button-group">
                                 <a href="https://${type === '1' ? 'book' : 'movie'}.douban.com/subject/${item.id}/" target="_blank" class="btn-detail">查看详情</a>
-                                <button class="btn-crawl" onclick="crawlItem('${type}', '${item.id}')">开始爬取</button>
+                                <button class="btn-crawl" onclick="crawlItem('${type}', '${item.id}')">开始爬�?</button>
                             </div>
                         `;
                         resultsDiv.appendChild(itemDiv);
@@ -1231,7 +1231,7 @@
                     showStatus(`找到 ${data.results.length} 个结果，请点击选择要爬取的项目`, 'success');
                 } else {
                     resultsDiv.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">暂无搜索结果</div>';
-                    showStatus('未找到相关结果', 'error');
+                    showStatus('未找到相关结�?', 'error');
                 }
                 
                 // 自动展开搜索结果
@@ -1245,7 +1245,7 @@
             }
         }
 
-        // 检查登录状态
+        // 检查登录状�?
         function checkLoginStatus() {
             const token = localStorage.getItem('token');
             const username = localStorage.getItem('username');
@@ -1260,7 +1260,7 @@
                 authButtons.style.display = 'none';
                 userInfo.style.display = 'flex';
                 usernameSpan.textContent = username;
-                // 加载已爬取内容
+                // 加载已爬取内�?
                 loadCrawledItems();
             } else {
                 authButtons.style.display = 'flex';
@@ -1271,15 +1271,15 @@
             }
         }
 
-        // 退出登录
+        // 退出登�?
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('username');
-            alert('已退出登录');
+            alert('已退出登�?');
             window.location.reload();
         }
 
-        // 页面加载时检查登录状态
+        // 页面加载时检查登录状�?
         document.addEventListener('DOMContentLoaded', checkLoginStatus);
 
         // 添加viewDetail函数
@@ -1294,14 +1294,14 @@
                 return;
             }
             
-            // 构建URL，确保token正确传递
+            // 构建URL，确保token正确传�?
             const url = `/v1/${type}/data/${id}?token=${token}`;
             console.log('Redirecting to:', url); // 调试日志
             window.location.href = url;
         }
 
         async function deleteItem(type, id) {
-            if (!confirm('确定要删除这条记录吗？')) {
+            if (!confirm('确定要删除这条记录吗�?')) {
                 return;
             }
             
@@ -1322,7 +1322,7 @@
                 
                 if (response.ok) {
                     alert('删除成功');
-                    loadCrawledItems(); // 重新加载已爬取列表
+                    loadCrawledItems(); // 重新加载已爬取列�?
                 } else {
                     const data = await response.json();
                     alert(data.error || '删除失败');
