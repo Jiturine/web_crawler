@@ -497,7 +497,7 @@ async def get_book_csv(request, book_id):
         writer.writerow(['书名', book_data['book_name']])
         writer.writerow(['作者', book_data['book_author']])
         writer.writerow(['出版社', book_data['book_publisher']])
-        writer.writerow(['出版日期', book_data['book_publish_date']])
+        writer.writerow(['出版日期', book_data['book_date']])
         writer.writerow(['评分', book_data['book_rating']])
         writer.writerow([])  # 空行
         
