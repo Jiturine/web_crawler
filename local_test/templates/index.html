@@ -1123,6 +1123,9 @@
                         return;
                     }
                 }
+
+                // 显示正在爬取的弹框
+                alert('正在爬取，请稍候...');
                 
                 // 开始爬取
                 const response = await fetch(`/v1/${typeStr}/crawl`, {
