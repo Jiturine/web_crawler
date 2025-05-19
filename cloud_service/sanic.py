@@ -17,13 +17,11 @@ from urllib.parse import urlparse
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Sanic("mySanic")
-app.static("/static", os.path.abspath(__file__)+"/static", name="static_files")
-app.static("/book_image", os.path.abspath(__file__) +
-           "./book_image", name="book_images")
-app.static("/movie_image", os.path.abspath(__file__) +
-           "./movie_image", name="movie_image")
-template_dir = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), 'templates')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app.static("/static", os.path.join(BASE_DIR, "static"), name="static_files")
+app.static("/book_image", os.path.join(BASE_DIR, "book_image"), name="book_images")
+app.static("/movie_image", os.path.join(BASE_DIR, "movie_image"), name="movie_image")
+template_dir = os.path.join(BASE_DIR, 'templates')
 
 env = Environment(
     loader=FileSystemLoader(template_dir, encoding='utf-8'),
