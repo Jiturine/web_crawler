@@ -153,7 +153,7 @@ async def crawl_book(request):
                     VALUES (%s, %s, 'book', CURRENT_TIMESTAMP)
                 """
                 cursor.execute(insert_sql, (user_id, str(book_id)))
-                print(f"成功处理用户 {user_id} 与图书 {book_id} 的关联")
+                print(f"成功处理用户 {user_id} 与图书 {book_id} 的关系")
                 
             # 所有操作都成功，提交事务
             conn.commit()
@@ -399,81 +399,91 @@ def get_book_comments(id, count):
         comment_texts = {}
         
         for url in urls:
-            resp = requests.get(url, headers=headers)
-            bs = BeautifulSoup(resp.text, 'html.parser')
-            comment_items = bs.find_all("li", {"class": "comment-item"})
-            
-            for comment_item in comment_items:
-                try:
-                    # 获取评论ID
+            try:
+                resp = requests.get(url, headers=headers)
+                bs = BeautifulSoup(resp.text, 'html.parser')
+                comment_items = bs.find_all("li", {"class": "comment-item"})
+                
+                for comment_item in comment_items:
                     try:
-                        comment_id = comment_item["data-cid"]
-                    except KeyError:
-                        comment_id = f"comment_{comment_count}"
-                    
-                    # 获取用户名
-                    try:
-                        avatar = comment_item.find("div", {"class": "avatar"})
-                        comment_username = avatar.find("a")["title"]
-                    except (AttributeError, KeyError):
-                        comment_username = "未知用户"
-                    
-                    # 获取有用数
-                    try:
-                        comment = comment_item.find("div", {"class": "comment"})
-                        comment_isuseful = int(comment.find("span", {"class": "vote-count"}).get_text())
-                    except (AttributeError, ValueError):
-                        comment_isuseful = 0
-                    
-                    # 获取评论时间
-                    try:
-                        comment_time_str = comment.find("a", {"class": "comment-time"}).get_text()
-                        comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
-                        comment_timestamp = int(time.mktime(comment_time))
-                    except (AttributeError, ValueError):
-                        comment_timestamp = int(time.time())
-                    
-                    # 获取评论内容
-                    try:
-                        comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
-                    except AttributeError:
-                        comment_content = "获取评论内容失败"
-                    
-                    # 获取评分
-                    try:
-                        match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
-                        comment_rating = int((match.group(1))) // 10 if match else 0
-                    except (AttributeError, ValueError):
-                        comment_rating = 0
-                    
-                    # 保存评论数据
-                    comment_texts[comment_id] = comment_content
-                    comment_data = {
-                        "comment_id": comment_id,
-                        "comment_username": comment_username,
-                        "comment_timestamp": comment_timestamp,
-                        "comment_rating": comment_rating,
-                        "comment_content": comment_content,
-                        "comment_isuseful": comment_isuseful,
-                        "comment_ispositive": 1  # 默认设置为1
-                    }
-                    comments.append(comment_data)
-                    
-                    comment_count += 1
-                    if comment_count >= count:
-                        break
+                        # 获取评论ID
+                        try:
+                            comment_id = comment_item["data-cid"]
+                        except KeyError:
+                            comment_id = f"comment_{comment_count}"
                         
-                except Exception as e:
-                    print(f"获取评论数据时出错: {str(e)}")
-                    continue
-            
-            if comment_count >= count:
-                break
-        
+                        # 获取用户名
+                        try:
+                            avatar = comment_item.find("div", {"class": "avatar"})
+                            comment_username = avatar.find("a")["title"]
+                        except (AttributeError, KeyError):
+                            comment_username = "未知用户"
+                        
+                        # 获取有用性
+                        try:
+                            comment = comment_item.find("div", {"class": "comment"})
+                            comment_isuseful = int(comment.find("span", {"class": "vote-count"}).get_text())
+                        except (AttributeError, ValueError):
+                            comment_isuseful = 0
+                        
+                        # 获取评论时间
+                        try:
+                            comment_time_str = comment.find("a", {"class": "comment-time"}).get_text()
+                            comment_time = time.strptime(comment_time_str, "%Y-%m-%d %H:%M:%S")
+                            comment_timestamp = int(time.mktime(comment_time))
+                        except (AttributeError, ValueError):
+                            comment_timestamp = int(time.time())
+                        
+                        # 获取评论内容
+                        try:
+                            comment_content = comment.find("p", {"class": "comment-content"}).get_text().strip()
+                        except AttributeError:
+                            comment_content = "获取评论内容失败"
+                        
+                        # 获取评分
+                        try:
+                            match = re.search(r'allstar(\d{2})', str(comment.find("span", {"class": "comment-info"})))
+                            comment_rating = int((match.group(1))) // 10 if match else 0
+                        except (AttributeError, ValueError):
+                            comment_rating = 0
+                        
+                        # 保存评论数据
+                        comment_texts[comment_id] = comment_content
+                        comment_data = {
+                            "comment_id": comment_id,
+                            "comment_username": comment_username,
+                            "comment_timestamp": comment_timestamp,
+                            "comment_rating": comment_rating,
+                            "comment_content": comment_content,
+                            "comment_isuseful": comment_isuseful,
+                            "comment_ispositive": 1  # 默认设置为1
+                        }
+                        comments.append(comment_data)
+                        
+                        comment_count += 1
+                        if comment_count >= count:
+                            break
+                            
+                    except Exception as e:
+                        print(f"获取评论数据时出错: {str(e)}")
+                        continue
+                
+                if comment_count >= count:
+                    break
+
+                # # 情感分析
+                # classify_results = classify(comment_texts)
+                # for result in classify_results:
+                #     for comment in comments:
+                #         if result['comment_id'] == comment['comment_id']:
+                #             comment['comment_ispositive'] = result['is_positive']
+            except Exception as e:
+                print(f"获取评论页面时出错: {e}")
+                continue
+                
         return comments
-        
     except Exception as e:
-        print(f"获取评论数据时出错: {str(e)}")
+        print(f"获取评论页面时出错: {e}")
         return []
 
 if __name__ == "__main__":
